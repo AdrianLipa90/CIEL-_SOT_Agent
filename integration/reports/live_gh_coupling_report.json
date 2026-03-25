@@ -1,0 +1,10 @@
+{
+  "schema": "ciel-sot-agent/live-gh-coupling-report/v0.1",
+  "generated_at": null,
+  "changed_keys": [],
+  "upstream_checks": [],
+  "phase_events": [],
+  "closure_defect_before": null,
+  "closure_defect_after": null,
+  "weighted_euler_vector_after": null
+}
