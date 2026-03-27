@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 from .orbital_bridge import build_orbital_bridge
-from .sapiens_surface_policy import build_surface_policy
 
 
 CLIENT_REPORT_DIR = Path('integration') / 'reports' / 'sapiens_client'
@@ -103,9 +102,8 @@ def append_turn(session: SapiensSession, role: str, content: str) -> SapiensSess
 def build_model_packet(session: SapiensSession, user_text: str) -> dict[str, Any]:
     append_turn(session, 'sapiens', user_text)
     geom = session.state_geometry
-    surface_policy = build_surface_policy(session.control_profile, truth_axis=session.identity.truth_axis)
     packet = {
-        'schema': 'ciel-sot-agent/sapiens-client-packet/v0.2',
+        'schema': 'ciel-sot-agent/sapiens-client-packet/v0.1',
         'identity': asdict(session.identity),
         'session': {
             'created_at': session.created_at,
@@ -114,7 +112,6 @@ def build_model_packet(session: SapiensSession, user_text: str) -> dict[str, Any
         },
         'state_geometry': geom,
         'control_profile': session.control_profile,
-        'surface_policy': surface_policy,
         'latest_user_turn': user_text,
         'memory_excerpt': [asdict(turn) for turn in session.memory[-6:]],
         'inference_contract': {
@@ -122,7 +119,6 @@ def build_model_packet(session: SapiensSession, user_text: str) -> dict[str, Any
             'identity_before_memory': True,
             'mode': session.control_profile.get('mode', 'standard'),
             'truth_axis': session.identity.truth_axis,
-            'epistemic_separation': surface_policy.get('epistemic_separation', []),
         },
     }
     return packet
@@ -135,11 +131,9 @@ def persist_session(root: str | Path, session: SapiensSession, packet: dict[str,
     session_path = report_dir / 'session.json'
     packet_path = report_dir / 'latest_packet.json'
     transcript_path = report_dir / 'transcript.md'
-    policy_path = report_dir / 'surface_policy.json'
 
     session_path.write_text(json.dumps(asdict(session), ensure_ascii=False, indent=2), encoding='utf-8')
     packet_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2), encoding='utf-8')
-    policy_path.write_text(json.dumps(packet.get('surface_policy', {}), ensure_ascii=False, indent=2), encoding='utf-8')
 
     lines = ['# Sapiens Session Transcript', '']
     for turn in session.memory:
@@ -150,7 +144,6 @@ def persist_session(root: str | Path, session: SapiensSession, packet: dict[str,
     return {
         'session_json': str(session_path),
         'latest_packet_json': str(packet_path),
-        'surface_policy_json': str(policy_path),
         'transcript_md': str(transcript_path),
     }
 
@@ -161,7 +154,7 @@ def run_sapiens_client(root: str | Path, user_text: str, sapiens_id: str = 'sapi
     packet = build_model_packet(session, user_text)
     paths = persist_session(root, session, packet)
     return {
-        'schema': 'ciel-sot-agent/sapiens-client-run/v0.2',
+        'schema': 'ciel-sot-agent/sapiens-client-run/v0.1',
         'packet': packet,
         'paths': paths,
     }
