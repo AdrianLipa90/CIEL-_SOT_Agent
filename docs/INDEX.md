@@ -6,6 +6,7 @@
 - `docs/OPERATIONS.md` — operational bridge for scripts, workflows, and report layers.
 - `docs/MASTER_PLAN_4_ALL_AGENTS_ATTENTION.md` — shared implementation direction for the Sapiens Main Panel.
 - `docs/ORBital_INTEGRATION_ADDENDUM.md` — orbital integration and bridge addendum.
+- `docs/Orbitrary shifts.md` — current orbitalization state of the repository: already orbitalized, partially orbitalized, and still outside stable orbit.
 - `AGENT.md` — operational rules for the integration attractor.
 
 ## Scientific and semantic notes
@@ -57,3 +58,4 @@
 - The shell-level bridge to `ciel-omega-demo` is connected to `docs/CIEL_OMEGA_DEMO_INTEGRATION.md`, `integration/upstreams/ciel_omega_demo_shell_map.json`, and `integration/upstreams/ciel_omega_demo_inventory.json`.
 - The orbital diagnostic path is connected to `docs/ORBital_INTEGRATION_ADDENDUM.md`, `integration/Orbital/main/global_pass.py`, and `src/ciel_sot_agent/orbital_bridge.py`.
 - The Sapiens panel path is connected to `docs/MASTER_PLAN_4_ALL_AGENTS_ATTENTION.md`, `integration/sapiens/panel_manifest.json`, `src/ciel_sot_agent/sapiens_panel/controller.py`, and `src/ciel_sot_agent/sapiens_panel/reduction.py`.
+- The repository orbitalization snapshot is connected to `docs/Orbitrary shifts.md`, `docs/ORBital_INTEGRATION_ADDENDUM.md`, and the main orbital/panel bridge layers.
