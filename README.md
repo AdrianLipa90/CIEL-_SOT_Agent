@@ -1,4 +1,9 @@
-# CIEL-_SOT_Agent
+# CIEL/Ω — General Quantum Consciousness System
+### *README — Architectural Documentation*
+A. Lipa, S. Sakpal, M. Kamecka, U. Ahmad (2025). (c) 2025 Adrian Lipa / Intention Lab
+
+---
+
 
 **Integration attractor for the CIEL ecosystem.**
 
