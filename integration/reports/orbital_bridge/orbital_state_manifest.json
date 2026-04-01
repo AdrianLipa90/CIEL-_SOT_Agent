@@ -1,0 +1,10 @@
+{
+  "coherence_index": 0.9309893333230331,
+  "topological_charge_global": 0.048498965690035194,
+  "phase_lock_error": 1.6215131395780191,
+  "beat_frequency_target_hz": 7.83,
+  "spectral_radius_A": 2.030364349344266,
+  "fiedler_L": 0.00042326407671338545,
+  "zeta_enabled": true,
+  "timestamp": "2026-04-01T07:12:06.365411+00:00"
+}
