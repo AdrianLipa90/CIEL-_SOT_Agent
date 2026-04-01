@@ -1,0 +1,17 @@
+{
+  "schema": "ciel-sot-agent/fixed-attribute/v0.1",
+  "attribute_key": "desktop",
+  "identity": "CIEL-Desktop",
+  "repository": "AdrianLipa90/CIEL-Desktop",
+  "branch": "main",
+  "kind": "desktop",
+  "status": "canonical-fixed-attribute",
+  "fixed": true,
+  "role": "desktop-surface",
+  "binding_target": "CIEL-_SOT_Agent",
+  "binding_mode": "fixed-attribute",
+  "notes": [
+    "Desktop is treated as a fixed attribute of the SOT_Agent integration manifold.",
+    "This declaration is canonical even before broader registry refactoring folds it into repository_registry.json."
+  ]
+}
