@@ -5,6 +5,7 @@ import math
 import re
 from pathlib import Path
 from collections import defaultdict
+from typing import Optional
 
 SECTORS = ["constraints", "fields", "runtime", "memory", "bridge", "vocabulary"]
 
@@ -110,7 +111,7 @@ def repo_root_from_here() -> Path:
     return Path(__file__).resolve().parent
 
 
-def _find_ciel_omega_root(repo_root: Path) -> Path | None:
+def _find_ciel_omega_root(repo_root: Path) -> Optional[Path]:
     candidates = [
         repo_root / 'src' / 'CIEL_OMEGA_COMPLETE_SYSTEM' / 'ciel_omega',
         repo_root / 'data' / 'source' / 'CIEL_OMEGA_COMPLETE_SYSTEM' / 'ciel_omega',
@@ -136,7 +137,7 @@ def module_name_from_path(root: Path, path: Path) -> str:
     return ".".join(["ciel_omega", *parts])
 
 
-def resolve_relative_import(module_name: str, level: int, imported_module: str | None) -> str:
+def resolve_relative_import(module_name: str, level: int, imported_module: Optional[str]) -> str:
     parts = module_name.split('.')
     pkg = parts[:-1]
     if level > len(pkg):
@@ -148,7 +149,7 @@ def resolve_relative_import(module_name: str, level: int, imported_module: str |
     return '.'.join([p for p in base if p])
 
 
-def sector_from_module(mod: str) -> str | None:
+def sector_from_module(mod: str) -> Optional[str]:
     parts = mod.split('.')
     if len(parts) >= 2 and parts[0] == 'ciel_omega' and parts[1] in SECTORS:
         return parts[1]
@@ -195,7 +196,7 @@ def count_import_edges(repo_root: Path):
 MD_LINK = re.compile(r'\[[^\]]+\]\(([^)]+)\)')
 
 
-def resolve_link(src: Path, rel: str) -> Path | None:
+def resolve_link(src: Path, rel: str) -> Optional[Path]:
     rel = rel.strip()
     if rel.startswith('http://') or rel.startswith('https://') or rel.startswith('#'):
         return None
