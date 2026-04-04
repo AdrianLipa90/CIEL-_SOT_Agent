@@ -116,14 +116,19 @@ Primary anchors:
 - `scripts/run_orbital_bridge.py`
 - `integration/reports/orbital_bridge/`
 
-### 5. Sapiens interaction seed subsystem
+### 5. Sapiens interaction and panel subsystem
 
-The Sapiens client layer is the first human-model interaction bridge in the repository.
-It initializes a Sapiens session, derives interaction state from bridge/orbital state, builds a model packet, persists transcript/session artifacts, and prepares the ground for the full Sapiens panel.
+The Sapiens runtime now exposes two coupled surfaces in the repository:
+- the packet-oriented client runtime,
+- the panel foundation shell.
+
+Together they initialize Sapiens session state, derive interaction state from bridge/orbital state, build model or panel payloads, and persist session artifacts.
 
 Primary anchors:
 - `src/ciel_sot_agent/sapiens_client.py`
-- `scripts/run_sapiens_client.py`
+- `src/ciel_sot_agent/sapiens_panel/`
+- `scripts/run_sapiens_panel.py`
+- `ciel-sot-sapiens-client`
 - `integration/reports/sapiens_client/`
 
 ### 6. Documentation and registry manifold
@@ -244,12 +249,18 @@ Validation layer for synchronization, indexing, GitHub coupling, orbital runtime
 
 ## Existing launchers
 
-The repository already exposes thin launchers for the main execution paths:
+The repository exposes thin launchers for the main execution paths:
 
 - `scripts/run_gh_repo_coupling.py`
+- `scripts/run_gh_repo_coupling_v2.py`
+- `scripts/run_index_validator_v2.py`
 - `scripts/run_orbital_global_pass.py`
 - `scripts/run_orbital_bridge.py`
-- `scripts/run_sapiens_client.py`
+- `scripts/run_repo_phase_sync.py`
+- `scripts/run_repo_sync_v2.py`
+- `scripts/run_sapiens_panel.py`
+
+In addition to these wrappers, `pyproject.toml` defines console entrypoints for the packaged runtime, including `ciel-sot-sapiens-client`.
 
 This is deliberate.
 Scripts remain thin wrappers while the actual logic stays in documented subsystems.
@@ -278,17 +289,22 @@ They are documented as explicit report layers.
 
 ## Validation layer
 
-The repository already contains a validation surface that checks multiple subsystems:
+The repository contains a validation surface that checks multiple subsystems:
 - repository phase tests,
 - GitHub coupling tests,
-- index validation tests,
-- orbital runtime tests.
+- v2 synchronization and index tests,
+- orbital runtime tests,
+- Sapiens client and panel tests.
 
-Primary anchors:
+Representative anchors:
 - `tests/test_repo_phase.py`
 - `tests/test_gh_coupling.py`
+- `tests/test_gh_coupling_v2.py`
 - `tests/test_index_validator.py`
+- `tests/test_index_validator_v2.py`
 - `tests/test_orbital_runtime.py`
+- `tests/test_sapiens_client_packet.py`
+- `tests/test_sapiens_panel.py`
 
 ---
 
