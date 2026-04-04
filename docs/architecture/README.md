@@ -16,8 +16,12 @@ Files in this sector should describe:
 During phase 1, architectural documents may still exist in legacy flat paths under `docs/`.
 The goal of this sector is to establish the target structure first.
 
-## Planned contents
+## Current anchor documents
 
 - `ARCHITECTURE.md`
 - `REPO_REFACTOR_PLAN.md`
-- future ADRs and architecture decision notes
+- `REPO_GEOMETRY_STATUS.md`
+- `V2_CANONICAL_SWITCH_PLAN.md`
+- `V2_CANONICAL_SWITCH_READINESS.md`
+
+Future ADRs and architecture decision notes may be added here without changing the sector role.
