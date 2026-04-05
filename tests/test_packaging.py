@@ -37,11 +37,32 @@ class TestDebianPackageStructure:
     def test_prerm_exists(self):
         assert (DEB_DIR / "DEBIAN" / "prerm").is_file()
 
+    def test_postrm_exists(self):
+        assert (DEB_DIR / "DEBIAN" / "postrm").is_file()
+
+    def test_conffiles_exists(self):
+        assert (DEB_DIR / "DEBIAN" / "conffiles").is_file()
+
     def test_launcher_exists(self):
         assert (DEB_DIR / "usr" / "bin" / "ciel-sot-gui").is_file()
 
+    def test_model_installer_launcher_exists(self):
+        assert (DEB_DIR / "usr" / "bin" / "ciel-sot-install-model").is_file()
+
     def test_service_file_exists(self):
         assert (DEB_DIR / "usr" / "lib" / "systemd" / "system" / "ciel-sot-gui.service").is_file()
+
+    def test_wheels_dir_exists(self):
+        assert (DEB_DIR / "opt" / "ciel-sot-agent" / "wheels").is_dir()
+
+    def test_models_dir_exists(self):
+        assert (DEB_DIR / "var" / "lib" / "ciel" / "models").is_dir()
+
+    def test_config_file_exists(self):
+        assert (DEB_DIR / "etc" / "ciel-sot-agent" / "config.yaml").is_file()
+
+    def test_constraints_file_exists(self):
+        assert (DEB_DIR / "constraints.txt").is_file()
 
     def test_readme_exists(self):
         assert (DEB_DIR / "README.md").is_file()
@@ -68,11 +89,24 @@ class TestDebianControlFile:
         assert re.match(r"\d+\.\d+\.\d+", version), f"Unexpected version: {version}"
 
     def test_architecture(self):
-        assert self._field("Architecture") == "all"
+        # The control template uses a placeholder that build_deb.sh replaces
+        # at build time with the host arch.
+        arch = self._field("Architecture")
+        assert arch == "_DEB_ARCH_", (
+            f"Architecture should be _DEB_ARCH_ (replaced at build time), got: {arch}"
+        )
 
     def test_depends_python(self):
         depends = self._field("Depends")
         assert "python3" in depends
+
+    def test_depends_python_venv(self):
+        depends = self._field("Depends")
+        assert "python3-venv" in depends
+
+    def test_does_not_depend_on_pip(self):
+        depends = self._field("Depends")
+        assert "python3-pip" not in depends
 
     def test_description_not_empty(self):
         assert len(self._field("Description")) > 10
@@ -83,9 +117,32 @@ class TestDebianScripts:
         content = (DEB_DIR / "DEBIAN" / "postinst").read_text()
         assert content.startswith("#!/bin/sh") or content.startswith("#!/usr/bin/env sh")
 
+    def test_postinst_creates_venv(self):
+        content = (DEB_DIR / "DEBIAN" / "postinst").read_text()
+        assert "python3 -m venv" in content
+
     def test_postinst_contains_pip_install(self):
         content = (DEB_DIR / "DEBIAN" / "postinst").read_text()
-        assert "pip3 install" in content or "pip install" in content
+        # pip is invoked via the venv path (e.g. "${VENV_DIR}/bin/pip" install)
+        # or as a global pip; accept either form
+        assert re.search(r'/pip["\']?\s+install|pip3?\s+install', content)
+
+    def test_postinst_installs_offline(self):
+        content = (DEB_DIR / "DEBIAN" / "postinst").read_text()
+        assert "--no-index" in content
+
+    def test_postinst_uses_bundled_wheels(self):
+        content = (DEB_DIR / "DEBIAN" / "postinst").read_text()
+        assert "--find-links" in content
+
+    def test_postinst_does_not_global_pip_install(self):
+        content = (DEB_DIR / "DEBIAN" / "postinst").read_text()
+        # A bare (global) pip install starts the line with pip3 or pip
+        assert not re.search(r"^\s*pip3?\s+install", content, re.MULTILINE)
+
+    def test_postinst_installs_into_opt_venv(self):
+        content = (DEB_DIR / "DEBIAN" / "postinst").read_text()
+        assert "/opt/ciel-sot-agent" in content
 
     def test_prerm_is_shell_script(self):
         content = (DEB_DIR / "DEBIAN" / "prerm").read_text()
@@ -98,6 +155,51 @@ class TestDebianScripts:
     def test_prerm_disables_service(self):
         content = (DEB_DIR / "DEBIAN" / "prerm").read_text()
         assert "systemctl disable" in content
+
+    def test_postrm_is_shell_script(self):
+        content = (DEB_DIR / "DEBIAN" / "postrm").read_text()
+        assert content.startswith("#!/bin/sh") or content.startswith("#!/usr/bin/env sh")
+
+    def test_postrm_cleans_up_venv(self):
+        content = (DEB_DIR / "DEBIAN" / "postrm").read_text()
+        assert "/opt/ciel-sot-agent" in content
+        assert "rm -rf" in content or "purge" in content
+
+    def test_postrm_reloads_systemd(self):
+        content = (DEB_DIR / "DEBIAN" / "postrm").read_text()
+        assert "daemon-reload" in content
+
+
+class TestDebianConffiles:
+    def test_conffiles_lists_config(self):
+        content = (DEB_DIR / "DEBIAN" / "conffiles").read_text()
+        assert "/etc/ciel-sot-agent/config.yaml" in content
+
+
+class TestDebianConfigFile:
+    @pytest.fixture(autouse=True)
+    def load_config(self):
+        self.content = (
+            DEB_DIR / "etc" / "ciel-sot-agent" / "config.yaml"
+        ).read_text()
+
+    def test_is_valid_yaml(self):
+        import yaml
+        data = yaml.safe_load(self.content)
+        assert isinstance(data, dict)
+
+    def test_has_gui_section(self):
+        import yaml
+        data = yaml.safe_load(self.content)
+        assert "gui" in data
+        assert "host" in data["gui"]
+        assert "port" in data["gui"]
+
+    def test_has_models_section(self):
+        import yaml
+        data = yaml.safe_load(self.content)
+        assert "models" in data
+        assert "dir" in data["models"]
 
 
 class TestDebianServiceFile:
@@ -122,6 +224,10 @@ class TestDebianServiceFile:
     def test_exec_start_uses_launcher(self):
         assert "ciel-sot-gui" in self.content
 
+    def test_references_config(self):
+        assert "CIEL_SOT_CONFIG" in self.content
+        assert "/etc/ciel-sot-agent/config.yaml" in self.content
+
 
 class TestDebianLauncher:
     def test_launcher_is_shell_script(self):
@@ -132,19 +238,66 @@ class TestDebianLauncher:
         content = (DEB_DIR / "usr" / "bin" / "ciel-sot-gui").read_text()
         assert "ciel_sot_agent.gui" in content or "ciel-sot-gui" in content
 
+    def test_launcher_uses_venv(self):
+        content = (DEB_DIR / "usr" / "bin" / "ciel-sot-gui").read_text()
+        assert "/opt/ciel-sot-agent/venv" in content
+
+    def test_model_installer_launcher_is_shell_script(self):
+        content = (DEB_DIR / "usr" / "bin" / "ciel-sot-install-model").read_text()
+        assert content.startswith("#!/bin/sh") or content.startswith("#!/usr/bin/env sh")
+
+    def test_model_installer_launcher_uses_venv(self):
+        content = (DEB_DIR / "usr" / "bin" / "ciel-sot-install-model").read_text()
+        assert "/opt/ciel-sot-agent/venv" in content
+
 
 class TestBuildScript:
+    @pytest.fixture(autouse=True)
+    def load_build_script(self):
+        self.content = (DEB_DIR / "build_deb.sh").read_text()
+
     def test_build_script_is_bash(self):
-        content = (DEB_DIR / "build_deb.sh").read_text()
-        assert "#!/usr/bin/env bash" in content or "#!/bin/bash" in content
+        assert "#!/usr/bin/env bash" in self.content or "#!/bin/bash" in self.content
 
     def test_build_script_calls_dpkg_deb(self):
-        content = (DEB_DIR / "build_deb.sh").read_text()
-        assert "dpkg-deb" in content
+        assert "dpkg-deb" in self.content
 
     def test_build_script_references_version_file(self):
-        content = (DEB_DIR / "build_deb.sh").read_text()
-        assert "VERSION" in content
+        assert "VERSION" in self.content
+
+    def test_build_script_bundles_wheels(self):
+        assert "pip wheel" in self.content or "pip download" in self.content
+
+    def test_build_script_uses_staging_dir(self):
+        assert "STAGING" in self.content or "mktemp" in self.content
+
+    def test_build_script_enforces_binary_only(self):
+        assert "--only-binary" in self.content
+
+    def test_build_script_uses_constraints(self):
+        assert "constraints" in self.content.lower()
+
+    def test_build_script_detects_architecture(self):
+        assert "dpkg --print-architecture" in self.content or "DEB_ARCH" in self.content
+
+
+class TestConstraintsFile:
+    def test_constraints_file_is_not_empty(self):
+        content = (DEB_DIR / "constraints.txt").read_text()
+        # Should have at least core deps pinned
+        assert len(content.strip()) > 0
+
+    def test_constraints_pins_numpy(self):
+        content = (DEB_DIR / "constraints.txt").read_text()
+        assert re.search(r"numpy==\d+\.\d+\.\d+", content)
+
+    def test_constraints_pins_pyyaml(self):
+        content = (DEB_DIR / "constraints.txt").read_text()
+        assert re.search(r"PyYAML==\d+\.\d+\.\d+", content)
+
+    def test_constraints_pins_flask(self):
+        content = (DEB_DIR / "constraints.txt").read_text()
+        assert re.search(r"[Ff]lask==\d+\.\d+\.\d+", content)
 
 
 # ---------------------------------------------------------------------------
