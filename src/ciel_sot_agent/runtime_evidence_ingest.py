@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from .paths import resolve_project_root
+
 
 RUNTIME_CONTRACT_PATH = 'integration/runtime_modes/desktop_runtime_contract.json'
 RUNTIME_EVIDENCE_SCHEMA_PATH = 'integration/runtime_modes/runtime_evidence_schema.json'
@@ -112,7 +114,7 @@ def main() -> int:
     parser.add_argument('evidence', help='Path to desktop runtime evidence JSON file.')
     args = parser.parse_args()
 
-    root = Path(__file__).resolve().parents[2]
+    root = resolve_project_root(Path(__file__))
     result = ingest_runtime_evidence(root, args.evidence)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0 if result.get('valid') else 1

@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from .paths import resolve_project_root
 from .repo_phase import RepositoryState, closure_defect, load_couplings, load_registry, weighted_euler_vector
 
 
@@ -241,7 +242,7 @@ def build_live_coupling(root: str | Path) -> dict[str, Any]:
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[2]
+    root = resolve_project_root(Path(__file__))
     report = build_live_coupling(root)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0

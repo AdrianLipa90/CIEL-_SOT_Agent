@@ -7,6 +7,8 @@ from typing import Any, Mapping
 
 import yaml
 
+from .paths import resolve_project_root
+
 
 DEMO_SHELL_MAP_OBJECT_ID = 'MAP-SOT-0001'
 DEMO_SHELL_MAP_SCHEMA = 'ciel-sot-agent/demo-shell-map/v0.1'
@@ -254,7 +256,7 @@ def validate_index_registry(root: str | Path) -> list[ValidationIssue]:
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[2]
+    root = resolve_project_root(Path(__file__))
     issues = validate_index_registry(root)
     for issue in issues:
         print(f'[{issue.level}] {issue.object_id}: {issue.message}')

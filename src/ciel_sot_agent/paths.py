@@ -16,4 +16,9 @@ def resolve_project_root(anchor: str | Path) -> Path:
         if (parent / "integration").exists():
             return parent
 
+    cwd = Path.cwd()
+    for parent in [cwd, *cwd.parents]:
+        if (parent / "integration").exists():
+            return parent
+
     return anchor_path.parents[2]
