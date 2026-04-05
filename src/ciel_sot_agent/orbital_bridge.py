@@ -4,6 +4,11 @@ bridge state, health, and control-recommendation manifests.
 Connects the CIEL integration kernel to the Orbital diagnostic subsystem
 living under ``integration/Orbital/``, ensuring phase-coherence and
 resource health are reported at each synchronisation cycle.
+
+After the orbital physics pass the bridge routes the resulting state through
+the CIEL/Ω consciousness pipeline (``ciel_pipeline.run_ciel_pipeline``) so
+that emotional, ethical, and soul-invariant metrics are embedded in every
+report alongside the raw geometry.
 """
 from __future__ import annotations
 
@@ -42,6 +47,11 @@ def _bridge_markdown(summary: dict[str, Any]) -> str:
     lines += ['', '## Bridge Metrics']
     for key, value in summary['bridge_metrics'].items():
         lines.append(f'- {key}: {value}')
+    ciel = summary.get('ciel_pipeline', {})
+    if ciel:
+        lines += ['', '## CIEL Pipeline']
+        for key, value in ciel.items():
+            lines.append(f'- {key}: {value}')
     return '\n'.join(lines)
 
 
@@ -60,7 +70,7 @@ def build_orbital_bridge(root: str | Path) -> dict[str, Any]:
     bridge_dir = root / BRIDGE_DIR
     bridge_dir.mkdir(parents=True, exist_ok=True)
 
-    summary = {
+    summary: dict[str, Any] = {
         'schema': 'ciel-sot-agent/orbital-bridge-report/v0.1',
         'source_report': str(Path('integration/Orbital/main/reports/global_orbital_coherence_pass/summary.json')),
         'source_paths': orbital_paths,
@@ -79,6 +89,22 @@ def build_orbital_bridge(root: str | Path) -> dict[str, Any]:
             'topological_charge_global': float(final.get('Lambda_glob', 0.0)),
         },
     }
+
+    # Route orbital state through the CIEL/Ω consciousness pipeline so that
+    # emotional, ethical, and soul-invariant signals are attached to every report.
+    try:
+        from .ciel_pipeline import run_ciel_pipeline
+        ciel_result = run_ciel_pipeline(summary, context='orbital_bridge', root=root)
+        summary['ciel_pipeline'] = {
+            'status': ciel_result['ciel_status'],
+            'dominant_emotion': ciel_result['dominant_emotion'],
+            'mood': ciel_result['mood'],
+            'soul_invariant': ciel_result['soul_invariant'],
+            'ethical_score': ciel_result['ethical_score'],
+            'orbital_context': ciel_result['orbital_context'],
+        }
+    except Exception:
+        summary['ciel_pipeline'] = {'status': 'unavailable'}
 
     (bridge_dir / 'orbital_bridge_report.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding='utf-8')
     (bridge_dir / 'orbital_bridge_report.md').write_text(_bridge_markdown(summary), encoding='utf-8')

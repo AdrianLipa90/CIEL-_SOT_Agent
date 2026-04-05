@@ -86,6 +86,7 @@ EXPECTED_MODULES: dict[str, str] = {
     "__init__.py": "package init",
     "__main__.py": "CLI entry point",
     "paths.py": "project root resolution",
+    "ciel_pipeline.py": "CIEL/Ω pipeline adapter — routes orbital state through CielEngine",
     "repo_phase.py": "repository phase state and sync report",
     "synchronize.py": "synchronize entry point (v1)",
     "synchronize_v2.py": "synchronize entry point (v2)",
@@ -136,6 +137,7 @@ class TestModuleDocstrings:
         "rel_path",
         [
             "paths.py",
+            "ciel_pipeline.py",
             "repo_phase.py",
             "synchronize.py",
             "synchronize_v2.py",
@@ -172,6 +174,7 @@ class TestEntryPoints:
         "index_validator.py",
         "index_validator_v2.py",
         "orbital_bridge.py",
+        "ciel_pipeline.py",
         "sapiens_client.py",
         "runtime_evidence_ingest.py",
     ]
@@ -263,6 +266,7 @@ class TestScriptsIntegrity:
 PUBLIC_MODULES = [
     "src.ciel_sot_agent",
     "src.ciel_sot_agent.paths",
+    "src.ciel_sot_agent.ciel_pipeline",
     "src.ciel_sot_agent.repo_phase",
     "src.ciel_sot_agent.synchronize",
     "src.ciel_sot_agent.synchronize_v2",

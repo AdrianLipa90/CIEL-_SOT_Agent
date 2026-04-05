@@ -55,7 +55,7 @@
     "spectral_radius_A": 1.5788043476614742,
     "fiedler_L": 0.17438387493107926,
     "zeta_enabled": true,
-    "timestamp": "2026-04-05T06:10:45.318387+00:00"
+    "timestamp": "2026-04-05T06:24:11.508651+00:00"
   },
   "health_manifest": {
     "system_health": 0.5684045566434583,
@@ -81,5 +81,13 @@
     "orbital_closure_penalty": 6.203753209251693,
     "integration_closure_defect_proxy": 0.9210287158864723,
     "topological_charge_global": 0.09173654040948012
+  },
+  "ciel_pipeline": {
+    "status": "ok",
+    "dominant_emotion": "love",
+    "mood": 0.900231987496021,
+    "soul_invariant": 0.901067650127713,
+    "ethical_score": 0.35431562920368376,
+    "orbital_context": "orbital|mode=safe|R_H=0.0790|closure=6.2038|chirality=0.0917"
   }
 }
