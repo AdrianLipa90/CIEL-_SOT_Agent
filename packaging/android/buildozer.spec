@@ -25,6 +25,8 @@ android.minapi = 26
 android.api = 33
 android.ndk = 25b
 android.archs = arm64-v8a,armeabi-v7a
+android.sdk_path = ~/.android/sdk
+android.ndk_path = ~/.android/sdk/ndk/25.1.8937393
 
 # Icons and presplash (replace with actual assets before release)
 # android.icon.filename = %(source.dir)s/assets/icon.png
