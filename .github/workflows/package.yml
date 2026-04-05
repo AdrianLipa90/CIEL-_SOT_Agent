@@ -51,12 +51,13 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             git zip unzip openjdk-17-jdk \
-            autoconf automake libtool pkg-config zlib1g-dev \
+            autoconf automake libtool libtool-bin pkg-config zlib1g-dev \
             libncurses-dev libtinfo6 \
             cmake libffi-dev libssl-dev wget
+          echo "ACLOCAL_PATH=/usr/share/aclocal" >> $GITHUB_ENV
 
       - name: Install Buildozer + Cython
-        run: pip install --upgrade "buildozer==1.5.0" "python-for-android==2024.1.21" cython
+        run: pip install --upgrade "buildozer==1.5.0" "python-for-android==2023.09.16" cython
 
       - name: Cache Buildozer and Android SDK
         id: cache-buildozer
@@ -90,6 +91,8 @@ jobs:
 
       - name: Build APK
         working-directory: packaging/android
+        env:
+          ACLOCAL_PATH: /usr/share/aclocal
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             buildozer -v android release
