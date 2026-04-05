@@ -23,7 +23,7 @@ android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
 # Android API
 android.minapi = 26
 android.api = 33
-android.ndk = 25b
+android.ndk = 25.1.8937393
 android.archs = arm64-v8a,armeabi-v7a
 android.sdk_path = ~/.android/sdk
 android.ndk_path = ~/.android/sdk/ndk/25.1.8937393
