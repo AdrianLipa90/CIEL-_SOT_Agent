@@ -22,6 +22,7 @@ COMMANDS: dict[str, tuple[str, str]] = {
     "index-validate":           ("ciel_sot_agent.index_validator",         "main"),
     "index-validate-v2":        ("ciel_sot_agent.index_validator_v2",      "main"),
     "orbital-bridge":           ("ciel_sot_agent.orbital_bridge",          "main"),
+    "ciel-pipeline":            ("ciel_sot_agent.ciel_pipeline",           "main"),
     "sapiens-client":           ("ciel_sot_agent.sapiens_client",          "main"),
     "runtime-evidence-ingest":  ("ciel_sot_agent.runtime_evidence_ingest", "main"),
     "gui":                      ("ciel_sot_agent.gui.app",                 "main"),
