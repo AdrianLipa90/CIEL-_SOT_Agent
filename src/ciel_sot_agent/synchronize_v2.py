@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from .paths import resolve_project_root
 from .repo_phase import build_sync_report
 
 
@@ -44,7 +45,7 @@ def build_sync_report_v2(root: str | Path) -> dict[str, object]:
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[2]
+    root = resolve_project_root(Path(__file__))
     report = build_sync_report_v2(root)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0

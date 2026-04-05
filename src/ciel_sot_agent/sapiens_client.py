@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .orbital_bridge import build_orbital_bridge
+from .paths import resolve_project_root
 
 
 CLIENT_REPORT_DIR = Path('integration') / 'reports' / 'sapiens_client'
@@ -191,7 +192,7 @@ def main() -> int:
     parser.add_argument('--sapiens-id', default='sapiens', help='Human/client identity label.')
     args = parser.parse_args()
 
-    root = Path(__file__).resolve().parents[2]
+    root = resolve_project_root(Path(__file__))
     result = run_sapiens_client(root, args.text, sapiens_id=args.sapiens_id)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0

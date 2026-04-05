@@ -7,6 +7,7 @@ from typing import Any
 from integration.Orbital.main.bootstrap import ensure_orbital_manifests, ensure_orbital_report_dirs
 from integration.Orbital.main.global_pass import run_global_pass
 from integration.Orbital.main.phase_control import build_health_manifest, build_state_manifest, recommend_control
+from .paths import resolve_project_root
 
 
 BRIDGE_DIR = Path('integration') / 'reports' / 'orbital_bridge'
@@ -80,7 +81,7 @@ def build_orbital_bridge(root: str | Path) -> dict[str, Any]:
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[2]
+    root = resolve_project_root(Path(__file__))
     summary = build_orbital_bridge(root)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0

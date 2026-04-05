@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from .paths import resolve_project_root
 from .repo_phase import build_sync_report
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[2]
+    root = resolve_project_root(Path(__file__))
     registry_path = root / 'integration' / 'repository_registry.json'
     couplings_path = root / 'integration' / 'couplings.json'
     report = build_sync_report(registry_path, couplings_path)
