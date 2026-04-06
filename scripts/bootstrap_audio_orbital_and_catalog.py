@@ -26,30 +26,53 @@ def repo_relative(repo_root: Path, path: Path) -> str:
         return str(path)
 
 
-def maybe_parse_json(text: str) -> dict[str, Any] | list[Any] | None:
+def relativize_json_paths(repo_root: Path, value: Any) -> Any:
+    """
+    Recursively normalize path-like strings in a JSON-compatible object to repository-relative form.
+
+    Strings that resolve under ``repo_root`` are converted to repo-relative POSIX paths.
+    Non-path strings and values outside the repository are preserved unchanged.
+    """
+    if isinstance(value, dict):
+        return {k: relativize_json_paths(repo_root, v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [relativize_json_paths(repo_root, v) for v in value]
+    if isinstance(value, str):
+        try:
+            candidate = Path(value)
+            if candidate.is_absolute():
+                return repo_relative(repo_root, candidate)
+        except Exception:
+            return value
+    return value
+
+
+def maybe_parse_json(repo_root: Path, text: str) -> dict[str, Any] | list[Any] | None:
     """
     Try to parse a stdout/stderr text blob as JSON.
 
     Returns parsed JSON on success; otherwise returns ``None``.
+    Parsed payloads are normalized so path-like strings become repository-relative when possible.
     """
     if not text or not text.strip():
         return None
     try:
-        return json.loads(text)
+        return relativize_json_paths(repo_root, json.loads(text))
     except Exception:
         return None
 
 
-def load_json_if_exists(path: Path) -> dict[str, Any] | list[Any] | None:
+def load_json_if_exists(repo_root: Path, path: Path) -> dict[str, Any] | list[Any] | None:
     """
     Load a JSON artifact from disk when present.
 
     Returns ``None`` when the file does not exist or the payload is not valid JSON.
+    Loaded payloads are normalized so path-like strings become repository-relative when possible.
     """
     if not path.exists():
         return None
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return relativize_json_paths(repo_root, json.loads(path.read_text(encoding="utf-8")))
     except Exception:
         return None
 
@@ -82,7 +105,7 @@ def run_step(repo_root: Path, script_name: str, extra_args: list[str] | None = N
         'returncode': proc.returncode,
         'stdout': proc.stdout,
         'stderr': proc.stderr,
-        'summary_json': maybe_parse_json(proc.stdout),
+        'summary_json': maybe_parse_json(repo_root, proc.stdout),
         'ok': proc.returncode == 0,
     }
 
@@ -130,9 +153,9 @@ def main() -> int:
     }
 
     artifact_snapshots = {
-        'audio_state': load_json_if_exists(repo_root / artifacts['audio_state']),
-        'orbital_report': load_json_if_exists(repo_root / artifacts['orbital_report']),
-        'db_manifest': load_json_if_exists(repo_root / artifacts['db_manifest']),
+        'audio_state': load_json_if_exists(repo_root, repo_root / artifacts['audio_state']),
+        'orbital_report': load_json_if_exists(repo_root, repo_root / artifacts['orbital_report']),
+        'db_manifest': load_json_if_exists(repo_root, repo_root / artifacts['db_manifest']),
     }
 
     summary = {
