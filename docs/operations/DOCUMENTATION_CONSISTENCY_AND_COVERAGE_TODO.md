@@ -56,11 +56,20 @@ Key seed artifacts:
 ## Current project state
 - [x] operation branch created from refreshed `main`
 - [x] full review package identified as primary input
-- [ ] documentation inventory validated against current `main`
-- [ ] declaration-versus-implementation matrix validated against current `main`
-- [ ] high-priority stale docs repaired
-- [ ] machine-readable repo map landed in repo
+- [x] documentation inventory validated against current `main`
+- [x] declaration-versus-implementation matrix validated against current `main`
+- [x] high-priority stale docs repaired
+- [x] machine-readable repo map landed in repo
 - [ ] final documentation audit gate passed
+
+### Current branch and important heads
+- operation branch: `operation/documentation-consistency-and-coverage-20260407`
+- branch start baseline from refreshed `main`: `13cc0ba932c2441943ca105f30edb2c9079e8df6`
+- current documentation operation head after README rewrite: `14b006290976fcd02a9e38aef6a2d8c87e55ccc4`
+
+### Problem ⇄ solution log
+- **problem:** branch drifted during the operation because `main` was merged into the operation branch while a README commit had been created on an older parent.
+- **solution:** the README rewrite was replayed onto the new branch head instead of force-moving or rewriting history.
 
 ---
 
@@ -73,24 +82,29 @@ Validate the review package against the current `main` and establish the documen
 - [x] create active operation branch
 - [x] confirm refreshed `main` baseline
 - [x] identify primary input package
-- [ ] record exact branch head used for operation start
+- [x] record exact branch head used for operation start
 
 ## A2. Input package validation
 - [x] unpack full review package locally
 - [x] inspect review artifact structure
-- [ ] verify package relevance against current `main`
-- [ ] identify which proposed files are safe to land immediately
-- [ ] identify which proposed files require fresh re-audit before landing
+- [x] verify package relevance against current `main`
+- [x] identify which proposed files are safe to land immediately
+- [x] identify which proposed files require fresh re-audit before landing
 
 ## A3. Documentation inventory
-- [ ] validate docs inventory against current repo
-- [ ] validate workflow documentation surface
-- [ ] validate packaging documentation surface
-- [ ] validate embedded/imported sector documentation coverage
+- [x] validate docs inventory against current repo
+- [x] validate workflow documentation surface
+- [x] validate packaging documentation surface
+- [x] validate embedded/imported sector documentation coverage
 
 ## A4. Phase exit criteria
-- [ ] input package validated against current repo
-- [ ] inventory baseline explicit
+- [x] input package validated against current repo
+- [x] inventory baseline explicit
+
+## Phase A completion notes
+- [x] the review package was accepted as a real operational seed, not as a blind merge bundle
+- [x] high-risk files (`README.md`, `docs/INDEX.md`, `docs/OPERATIONS.md`) were treated as re-audit targets rather than auto-imports
+- [x] safe supporting artifacts were landed first
 
 ---
 
@@ -100,21 +114,26 @@ Validate the review package against the current `main` and establish the documen
 Turn the review package into a current declaration/implementation truth map for the repo.
 
 ## B1. Claim extraction
-- [ ] map top-level README claims
-- [ ] map docs/INDEX claims
-- [ ] map docs/OPERATIONS claims
-- [ ] map workflow docs claims
-- [ ] map packaging docs claims
+- [x] map top-level README claims
+- [x] map docs/INDEX claims
+- [x] map docs/OPERATIONS claims
+- [x] map workflow docs claims
+- [x] map packaging docs claims
 
 ## B2. Status classification
-- [ ] classify each key claim as IMPLEMENTED
-- [ ] classify each key claim as IMPLEMENTED_TRANSITIONAL
-- [ ] classify each key claim as INCOMPLETE_DOC
-- [ ] classify each key claim as STALE_DOC
-- [ ] classify each key claim as DECLARED_FUTURE
+- [x] classify each key claim as IMPLEMENTED
+- [x] classify each key claim as IMPLEMENTED_TRANSITIONAL
+- [x] classify each key claim as INCOMPLETE_DOC
+- [x] classify each key claim as STALE_DOC
+- [x] classify each key claim as DECLARED_FUTURE
 
 ## B3. Phase exit criteria
-- [ ] current declaration/implementation matrix is explicit
+- [x] current declaration/implementation matrix is explicit
+
+## Phase B completion notes
+- [x] `docs/DECLARATION_IMPLEMENTATION_MATRIX.md` added to the repo
+- [x] stale claims were mapped before rewrite work, not after
+- [x] the main stale classes identified were launcher drift, core-only path drift, underdocumented workflow coverage, packaging overclaims, and underdocumented hybrid repo geometry
 
 ---
 
@@ -124,19 +143,25 @@ Turn the review package into a current declaration/implementation truth map for 
 Land the safest, highest-value documentation fixes first.
 
 ## C1. New supporting docs
-- [ ] add human repo guide
-- [ ] add declaration/implementation matrix doc
-- [ ] add workflow README
-- [ ] add machine-readable repo maps
+- [x] add human repo guide
+- [x] add declaration/implementation matrix doc
+- [x] add workflow README
+- [x] add machine-readable repo maps
 
 ## C2. High-risk stale claims
-- [ ] correct Sapiens client surface claims
-- [ ] correct core-only tooling path claims
-- [ ] correct workflow coverage claims
-- [ ] correct hybrid/native/embedded repo geometry claims
+- [x] correct Sapiens client surface claims
+- [x] correct core-only tooling path claims
+- [x] correct workflow coverage claims
+- [x] correct hybrid/native/embedded repo geometry claims
 
 ## C3. Phase exit criteria
-- [ ] highest-priority stale claims repaired
+- [x] highest-priority stale claims repaired
+
+## Phase C completion notes
+- [x] added `docs/REPOSITORY_GUIDE_HUMAN.md`
+- [x] added `integration/indices/REPOSITORY_MACHINE_MAP.json`
+- [x] added `integration/registries/REPOSITORY_MACHINE_MAP.yaml`
+- [x] expanded `.github/workflows/README.md` from a too-narrow single-workflow description to the current workflow surface set
 
 ---
 
@@ -146,17 +171,24 @@ Land the safest, highest-value documentation fixes first.
 Apply controlled rewrites to top-level and navigation docs after audit alignment.
 
 ## D1. Candidate rewrites
-- [ ] `README.md`
-- [ ] `docs/INDEX.md`
-- [ ] `docs/OPERATIONS.md`
+- [x] `README.md`
+- [x] `docs/INDEX.md`
+- [x] `docs/OPERATIONS.md`
 
 ## D2. Control checks
-- [ ] no path regressions introduced
-- [ ] no stale entrypoint references introduced
-- [ ] no overclaim beyond implementation state introduced
+- [x] no path regressions introduced
+- [x] no stale entrypoint references introduced
+- [x] no overclaim beyond implementation state introduced
 
 ## D3. Phase exit criteria
-- [ ] top-level documentation aligned with current repo geometry
+- [x] top-level documentation aligned with current repo geometry
+
+## Phase D completion notes
+- [x] `docs/INDEX.md` no longer points to non-existent `scripts/run_sapiens_client.py`
+- [x] `docs/OPERATIONS.md` now reflects scripts, core-only tools, workflows, and packaging as distinct operational layers
+- [x] `packaging/README.md` now distinguishes scripted installers, Debian package behavior, and Android build surface behavior
+- [x] `packaging/deb/README.md` now explicitly states that model download remains a post-install step
+- [x] `README.md` was rewritten as an integration/repository overview rather than a too-monolithic system description
 
 ---
 
@@ -166,8 +198,8 @@ Apply controlled rewrites to top-level and navigation docs after audit alignment
 Decide whether documentation is trustworthy enough to be treated as current system reference.
 
 ## E1. Required outputs
-- [ ] inventory baseline
-- [ ] declaration/implementation matrix
+- [x] inventory baseline
+- [x] declaration/implementation matrix
 - [ ] changed-file log
 - [ ] unresolved gap list
 
@@ -180,7 +212,17 @@ Decide whether documentation is trustworthy enough to be treated as current syst
 ## E3. Phase exit criteria
 - [ ] final operation status recorded
 
+## Current unresolved / next audit targets
+- [ ] prepare explicit changed-file log for all landed documentation commits in this operation
+- [ ] prepare unresolved gap list after current rewrite wave
+- [ ] decide whether any remaining folder-level READMEs or AGENT-like docs still underdescribe the current repo geometry
+- [ ] run final documentation truth pass against branch head `14b006290976fcd02a9e38aef6a2d8c87e55ccc4`
+
 ---
 
 ## Current active phase
-- [ ] Phase A — Inventory / Input Validation
+- [x] Phase A — Inventory / Input Validation
+- [x] Phase B — Declaration vs Implementation Audit
+- [x] Phase C — High-Priority Document Repairs
+- [x] Phase D — Primary Doc Rewrites
+- [ ] Phase E — Final Documentation Audit Gate
