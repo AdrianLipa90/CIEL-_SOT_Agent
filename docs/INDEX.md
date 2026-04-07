@@ -62,6 +62,7 @@ Use these labels explicitly when adding or revising documents:
 - `src/ciel_sot_agent/sapiens_panel/controller.py` — Sapiens panel state assembler.
 - `src/ciel_sot_agent/sapiens_panel/reduction.py` — orchestration, reduction-readiness, and memory-residue semantics.
 - `src/ciel_sot_agent/index_validator.py` — machine registry validator.
+- `src/ciel_sot_agent/phased_state.py` — identity-phase and relational-selection weighting model.
 
 ## GGUF model manager
 - `src/ciel_sot_agent/gguf_manager/manager.py` — stdlib-only GGUF model manager.
@@ -102,6 +103,7 @@ Use these labels explicitly when adding or revising documents:
 - `tests/test_sapiens_panel.py` — Sapiens panel foundation and reduction-state tests.
 - `tests/test_gui.py` — Flask GUI route and API endpoint tests.
 - `tests/test_gguf_manager.py` — GGUF model manager unit tests.
+- `tests/test_phased_state.py` — phased-state contract and selection-separation tests.
 
 ## Cross-reference anchors
 - The GH-as-attractor integration strategy is connected to `docs/ARCHITECTURE.md#github-as-operational-attractor`.

@@ -1,8 +1,10 @@
 """Phased-state model for repository and file-level identity scoring.
 
-Computes a deterministic phase value for each file/node based on its
-content hash, size, and type weight (ALPHA/BETA/B0 constants). Used by
-the holonomic normalizer and index-validation pipeline.
+Computes a deterministic identity phase for each file/node from its
+hash-derived fraction and computes selection energy from explicit
+relational metadata such as size, type, layer, connectivity, anchors,
+and upstream/downstream structure. Used by the holonomic normalizer and
+index-validation pipeline.
 
 Domain contracts:
 - ``compute_phase(h)`` expects a finite real hash fraction in ``[0.0, 1.0)``.
@@ -119,10 +121,6 @@ def _require_positive_weight(name: str, value) -> float:
 def f_conn(r: int) -> float:
     connection_count = _require_connection_count(r)
     return 1.0 + BETA * math.log(1.0 + connection_count)
-
-
-def f_seed(h: float) -> float:
-    return 0.95 + 0.10 * h
 
 
 def f_anchor(anchor_count: int) -> float:
