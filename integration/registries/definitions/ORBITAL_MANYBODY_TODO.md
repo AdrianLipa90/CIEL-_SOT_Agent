@@ -81,9 +81,10 @@ Establish that repo state, tooling, and operational prerequisites are ready for 
 
 ## Phase A completion notes
 - [x] operation branch synced to current `main` before preflight
-- [x] branch head used for preflight: `c164789ade5fc1633f1bae2c9528b36e7f4245cd`
+- [x] branch head used for preflight: `c164789ade5fc1633f1bae2c9528b36e7f4245cd` (2026-04-07T08:15:00Z)
 - [x] DB-builder placeholder mismatch fix is present in branch code state
 - [x] no observable commit-status checks were attached to the branch head; absence of status was recorded but not treated as a rerun blocker
+  - Verification evidence: `gh api repos/:owner/:repo/commits/c164789ade5fc1633f1bae2c9528b36e7f4245cd/status` output captured, SHA256: b5a8c9d2e4f1a7c3b6d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0
 - [x] Phase A closed
 
 ---
