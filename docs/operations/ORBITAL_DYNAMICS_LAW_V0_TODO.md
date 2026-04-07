@@ -14,6 +14,9 @@ After finishing any phase:
 - [ ] record next phase readiness
 - [ ] record predecessor/successor links if the operation is split or handed off
 
+Session handoff reference:
+- `docs/operations/CIEL_REPO_WORKSTYLE_SESSION_HANDOFF.md`
+
 Reporting protocol:
 - unchanged
 - progress, blockers, problem ⇄ solution, and state updates remain mandatory
@@ -61,6 +64,7 @@ Current `main` already contains:
 - and still lacked dedicated boundary tests for the phased-state entry functions.
 
 Phase B patchset resolves those phased-state entry-contract gaps on a dedicated branch.
+It also adds an explicit session-handoff workstyle document and links it into the repo's primary orientation surfaces.
 
 ---
 
@@ -127,12 +131,17 @@ Chosen contract:
 Changed files:
 - `src/ciel_sot_agent/phased_state.py`
 - `tests/test_phased_state.py`
+- `docs/operations/CIEL_REPO_WORKSTYLE_SESSION_HANDOFF.md`
+- `docs/INDEX.md`
+- `docs/OPERATIONS.md`
+- `AGENT.md`
 - `docs/operations/ORBITAL_DYNAMICS_LAW_V0_TODO.md`
 
 Resolved in this patchset:
 - phased-state entry functions now fail explicitly on invalid domain values,
 - the contract is documented in the module docstring and this ledger,
-- a dedicated boundary-test layer now exists for the module.
+- a dedicated boundary-test layer now exists for the module,
+- immediate session-orientation and handoff logic now exists as an explicit operations document linked from the main repo orientation surfaces.
 
 Known limitation:
 - full repo test execution was not performed inside this GitHub patchset flow; only the contract logic itself was checked during patch construction.
