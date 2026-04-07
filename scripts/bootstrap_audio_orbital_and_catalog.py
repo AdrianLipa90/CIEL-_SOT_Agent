@@ -84,6 +84,7 @@ def main() -> int:
     steps.append(run_step(repo_root, 'build_orbital_definition_registry.py', roots_args))
     steps.append(run_step(repo_root, 'normalize_definition_registry.py'))
     steps.append(run_step(repo_root, 'resolve_orbital_semantics.py'))
+    steps.append(run_step(repo_root, 'build_subsystem_sync_registry.py'))
     steps.append(run_step(repo_root, 'build_nonlocal_definition_edges.py'))
     steps.append(run_step(repo_root, 'build_definition_db_library.py'))
     steps.append(run_step(repo_root, 'run_audio_orbital_probe.py'))
@@ -96,6 +97,8 @@ def main() -> int:
         'orbital_registry': repo_relative(repo_root, repo_root / 'integration' / 'registries' / 'definitions' / 'orbital_definition_registry.json'),
         'internal_card_registry': repo_relative(repo_root, repo_root / 'integration' / 'registries' / 'definitions' / 'internal_subsystem_cards.json'),
         'horizon_policy_matrix': repo_relative(repo_root, repo_root / 'integration' / 'registries' / 'definitions' / 'horizon_policy_matrix.json'),
+        'subsystem_sync_registry': repo_relative(repo_root, repo_root / 'integration' / 'registries' / 'definitions' / 'subsystem_sync_registry.json'),
+        'subsystem_sync_report': repo_relative(repo_root, repo_root / 'integration' / 'registries' / 'definitions' / 'subsystem_sync_report.json'),
         'orbital_report': repo_relative(repo_root, repo_root / 'integration' / 'registries' / 'definitions' / 'orbital_assignment_report.json'),
         'nonlocal_edges': repo_relative(repo_root, repo_root / 'integration' / 'registries' / 'definitions' / 'nonlocal_definition_edges.json'),
         'db_manifest': repo_relative(repo_root, repo_root / 'integration' / 'registries' / 'definitions' / 'db_library' / 'manifest.json'),
@@ -106,11 +109,13 @@ def main() -> int:
         'orbital_report': load_json_if_exists(repo_root, repo_root / artifacts['orbital_report']),
         'internal_card_registry': load_json_if_exists(repo_root, repo_root / artifacts['internal_card_registry']),
         'horizon_policy_matrix': load_json_if_exists(repo_root, repo_root / artifacts['horizon_policy_matrix']),
+        'subsystem_sync_registry': load_json_if_exists(repo_root, repo_root / artifacts['subsystem_sync_registry']),
+        'subsystem_sync_report': load_json_if_exists(repo_root, repo_root / artifacts['subsystem_sync_report']),
         'db_manifest': load_json_if_exists(repo_root, repo_root / artifacts['db_manifest']),
     }
 
     summary = {
-        'schema': 'ciel/audio-orbital-catalog-hook/v0.4',
+        'schema': 'ciel/audio-orbital-catalog-hook/v0.5',
         'ok': ok,
         'steps': steps,
         'artifacts': artifacts,
