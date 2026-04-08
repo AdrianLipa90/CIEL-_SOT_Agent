@@ -34,6 +34,17 @@ def _wrap_crossings(old_phi: float, new_phi: float) -> int:
     return math.floor(new_phi / TWO_PI) - math.floor(old_phi / TWO_PI)
 
 
+def _copy_with_perturbed_sector(system: OrbitalSystem, name: str) -> OrbitalSystem:
+    tmp = OrbitalSystem(
+        sectors=dict(system.sectors),
+        couplings=system.couplings,
+        params=system.params,
+        zeta_pole=system.zeta_pole,
+    )
+    tmp.sectors[name] = deepcopy(system.sectors[name])
+    return tmp
+
+
 def tau_gradient(system: OrbitalSystem):
     from .metrics import A_i_zeta, effective_tau_zeta
     names = system.names()
@@ -125,7 +136,7 @@ def _legacy_step(system: OrbitalSystem, dt: float = 0.025, tau_eta: float = 0.01
 
 
 def _perturbed_potential(system: OrbitalSystem, name: str, *, dphi: float = 0.0, drho: float = 0.0) -> float:
-    tmp = deepcopy(system)
+    tmp = _copy_with_perturbed_sector(system, name)
     s = tmp.sectors[name]
     s.phi += dphi
     s.rho = min(0.96, max(0.02, s.rho + drho))
@@ -145,6 +156,7 @@ def _relational_step(system: OrbitalSystem, dt: float = 0.025, tau_eta: float = 
     relax_amp = _param(system, 'relax_amp', 0.28)
     closure_res = closure_residuals(system)
     vorts = local_vorticity(system)
+    zeta_defect = zeta_tetra_defect(system)
     h = _param(system, 'grad_eps', 1e-3)
     use_euler = bool(system.params.get('use_euler_leak_rotation', True))
     d_f = _param(system, 'D_f', 2.57)
@@ -195,7 +207,7 @@ def _relational_step(system: OrbitalSystem, dt: float = 0.025, tau_eta: float = 
             + 0.18 * closure_res[name]
             + 0.03 * abs(dV_dphi)
             + 0.03 * abs(dV_drho)
-            + 0.20 * zeta_tetra_defect(system)
+            + 0.20 * zeta_defect
         ))
 
     grads = tau_gradient(system)

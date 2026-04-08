@@ -49,33 +49,34 @@ The operation is complete only when:
 ---
 
 ## Branch and baseline
-Historical branch provenance:
+Historical merged branches:
 - `operation/orbital-dynamics-law-v0-phase-a-20260407`
 - `operation/orbital-dynamics-law-v0-phase-b-20260407`
 - `operation/orbital-dynamics-law-v0-phase-c-20260407`
-
-Normalization branch still open during this work:
 - `fix/post-merge-normalization-20260408`
-
-Active Phase E branch stacked on normalization head:
 - `operation/orbital-dynamics-law-v0-phase-e-20260408`
 
-Current Phase E baseline from normalization branch head:
-- `b92bba8b65664107ac24d073d08474edc0d559dd`
+Active Phase F branch:
+- `operation/orbital-dynamics-law-v0-phase-f-20260408`
+
+Current Phase F baseline from `main`:
+- `3de5a7f44e4400d88ee9b904d7c2cb19da038f67`
 
 ## Current rationale
-Current runtime already had:
-- relational/orbital dynamics with `rho`, `phi`, `tau`, `spin`, `info_mass`, `q_target`,
-- Phase A/B/C semantic groundwork,
-- but still lacked an explicit Orbital Law v0 runtime path.
+Current `main` already contains:
+- Phase A semantic boundary hardening,
+- Phase B phased-state contracts,
+- Phase C identity-phase versus selection-relevance separation,
+- post-merge normalization of repo-memory surfaces,
+- and Phase E runtime wiring for Orbital Law v0.
 
-The concrete gap before this patchset was:
-- `Sector` had no orbital-law state fields,
-- metrics had no `mu_eff` / `tau_orbit` / `phase_slip_ready` helper layer,
-- `step()` had no optional `use_orbital_law_v0` path,
-- global-pass summaries could not expose orbital-law v0 state even when enabled.
+The next bottleneck is now performance, not missing semantics.
+The clearest runtime hotspot remains the gradient-estimation path in `_relational_step()`:
+- `_perturbed_potential()` was cloning the whole `OrbitalSystem` for every sector perturbation,
+- `_relational_step()` invokes that perturbation path four times per sector,
+- and `zeta_tetra_defect(system)` was being recomputed inside every sector defect update despite being system-global for the step.
 
-Phase E patchset addresses that runtime gap directly.
+Phase F patchset addresses those avoidable costs first.
 
 ---
 
@@ -165,9 +166,8 @@ Normalize repo-memory surfaces after Phase A/B/C landed on `main`.
 ## Exit criteria
 - [x] operational memory surfaces match the actual merged state of `main`
 
-## Status
-- Implemented on `fix/post-merge-normalization-20260408`.
-- Not yet merged at the moment this stacked Phase E branch was created.
+## Status on `main`
+- Merged.
 
 ---
 
@@ -212,25 +212,9 @@ Introduce the effective orbital law into the existing orbital runtime without de
 ## Exit criteria
 - [x] runtime contains an effective discrete orbital law path v0
 
-## Phase E progress entry — 2026-04-08
-Resolved in this patchset:
-- `Sector` now carries `mu_eff`, `winding`, `tau_orbit`, `phase_slip_ready`, and `orbit_stability`,
-- `metrics.py` now computes target orbit radius, effective attractor strength, orbital period estimate, stability score, and phase-slip readiness,
-- `step()` now supports an explicit optional `use_orbital_law_v0` path layered on top of the existing relational or legacy step,
-- global-pass snapshots now expose aggregate orbital-law metrics when the path is enabled,
-- runtime tests now verify that enabling the path updates sector fields and reports orbital-law metrics.
-
-Changed files:
-- `integration/Orbital/main/model.py`
-- `integration/Orbital/main/metrics.py`
-- `integration/Orbital/main/dynamics.py`
-- `integration/Orbital/main/global_pass.py`
-- `tests/test_orbital_runtime.py`
-- `docs/operations/ORBITAL_DYNAMICS_LAW_V0_TODO.md`
-
-Known limitation:
-- this patchset implements the optional runtime path and minimal evidence surface, but it is not yet a full benchmark/certification pass.
-- post-merge normalization is still stacked underneath this branch until PR #213 lands.
+## Status on `main`
+- Merged.
+- Limitation still open: runtime path exists, but benchmark/certification evidence is not yet complete.
 
 ---
 
@@ -240,13 +224,28 @@ Known limitation:
 Repair the real bottleneck in `step_dynamics` after semantics are fixed.
 
 ## Checklist
-- [ ] profile `_relational_step()` and `_perturbed_potential()`
-- [ ] remove unnecessary `deepcopy`/full recomputation patterns from gradient estimation
+- [x] profile `_relational_step()` and `_perturbed_potential()` by code-path audit
+- [x] remove unnecessary `deepcopy`/full recomputation patterns from gradient estimation
 - [ ] replace numerical perturbation where possible with cached or analytical gradients
 - [ ] repeat benchmark after changes
 
 ## Exit criteria
 - [ ] performance gains come from mathematical/runtime cleanup, not from hiding the cost behind concurrency
+
+## Phase F progress entry — 2026-04-08
+Resolved in this patchset:
+- `_perturbed_potential()` no longer clones the full `OrbitalSystem`; it now copies only the perturbed sector into a shallow system shell,
+- `_relational_step()` now computes `zeta_tetra_defect(system)` once per step instead of once per sector,
+- runtime tests now verify that the perturbation helper does not mutate the source system.
+
+Changed files:
+- `integration/Orbital/main/dynamics.py`
+- `tests/test_orbital_runtime.py`
+- `docs/operations/ORBITAL_DYNAMICS_LAW_V0_TODO.md`
+
+Known limitation:
+- numerical gradient estimation still exists and is still the dominant algorithmic cost,
+- this patch removes avoidable cloning/recomputation overhead but is not yet the analytical-gradient rewrite.
 
 ---
 
@@ -282,11 +281,11 @@ Refactor package geometry only after semantics and runtime law stabilize.
 ---
 
 ## Current active phase
-- [ ] Phase F — Dynamics Performance Repair is the next implementation phase
+- [ ] Phase F — Dynamics Performance Repair advanced on branch
 - [ ] Phase G — Semantic Test & Bench Suite remains the next evidence phase
 
 ## Immediate next action
-- [ ] profile `_perturbed_potential()` / `_relational_step()` under both baseline and orbital-law-v0 mode before attempting optimization
+- [ ] decide whether the next patch should target analytical/cached gradients first or add the benchmark harness before deeper runtime surgery
 
 ## Successor rule
 If this operation is later split into sub-operations, every successor must link back here and record which patchset boundary it inherits.

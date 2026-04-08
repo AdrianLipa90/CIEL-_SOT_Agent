@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from integration.Orbital.main.bootstrap import ensure_orbital_manifests, ensure_orbital_report_dirs
-from integration.Orbital.main.dynamics import step
+from integration.Orbital.main.dynamics import _perturbed_potential, step
 from integration.Orbital.main.global_pass import run_global_pass
 from integration.Orbital.main.registry import load_system
 from src.ciel_sot_agent.orbital_bridge import build_orbital_bridge
@@ -102,3 +102,19 @@ def test_run_global_pass_with_orbital_law_v0_exposes_orbital_metrics() -> None:
     assert 'orbital_mu_eff_mean' in result['final']
     assert 'orbital_tau_orbit_mean' in result['final']
     assert 'orbital_phase_slip_ready_count' in result['final']
+
+
+def test_perturbed_potential_does_not_mutate_source_system(tmp_path: Path) -> None:
+    orbital_root = tmp_path / 'integration' / 'Orbital' / 'main'
+    orbital_root.mkdir(parents=True, exist_ok=True)
+    info = ensure_orbital_manifests(orbital_root)
+    system = load_system(info['sectors_path'], info['couplings_path'])
+
+    name = next(iter(system.sectors))
+    original_phi = system.sectors[name].phi
+    original_rho = system.sectors[name].rho
+
+    _ = _perturbed_potential(system, name, dphi=0.01, drho=0.01)
+
+    assert system.sectors[name].phi == original_phi
+    assert system.sectors[name].rho == original_rho
