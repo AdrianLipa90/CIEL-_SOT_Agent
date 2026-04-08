@@ -15,7 +15,7 @@ The repository currently uses workflows for four distinct purposes:
 - `ci.yml` — installs development dependencies, runs Ruff, then runs pytest.
 - `runtime_pipeline.yml` — performs editable-install smoke execution, builds a wheel, reinstalls from wheel, and re-runs selected runtime surfaces.
 - `package.yml` — builds the Debian package and Android APK, then uploads produced artifacts.
-- `gh_repo_coupling.yml` — runs on schedule and manual dispatch, executes the live GH coupling routine, and commits refreshed integration artifacts when state changes.
+- `gh_repo_coupling.yml` — runs on a 15 minute schedule and manual dispatch, executes `scripts/run_gh_repo_coupling.py`, and commits refreshed integration artifacts when state changes.
 
 ## Structural rule
 

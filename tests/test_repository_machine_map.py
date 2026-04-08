@@ -1,12 +1,12 @@
-"""Tests for documentation consistency after the documentation-consolidation PR.
+"""Tests for current documentation consistency on main.
 
-These tests verify the current (post-consolidation) state of repository documentation:
-- Deleted machine-map files are no longer present in the repo.
-- .github/workflows/README.md reflects the single documented workflow.
-- docs/INDEX.md no longer references removed files and has its new structure.
-- docs/OPERATIONS.md reflects the reduced operational scope.
-- packaging/README.md has the simplified installer description.
-- packaging/deb/README.md has the updated Debian install instructions.
+These tests verify the current repository state rather than a historical
+single-PR cleanup snapshot:
+- retained machine-map and documentation files that are still part of main
+  remain present on disk,
+- `.github/workflows/README.md` reflects the currently documented workflow
+  surface,
+- docs and packaging surfaces remain internally consistent.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-# Paths that were deleted in this PR and must no longer exist.
+# Retained files that are still part of the current repo state.
 JSON_MAP_PATH = REPO_ROOT / "integration" / "indices" / "REPOSITORY_MACHINE_MAP.json"
 YAML_MAP_PATH = REPO_ROOT / "integration" / "registries" / "REPOSITORY_MACHINE_MAP.yaml"
 DECL_MATRIX_DOC = REPO_ROOT / "docs" / "DECLARATION_IMPLEMENTATION_MATRIX.md"
@@ -26,7 +26,7 @@ DOC_CONSISTENCY_TODO = (
     REPO_ROOT / "docs" / "operations" / "DOCUMENTATION_CONSISTENCY_AND_COVERAGE_TODO.md"
 )
 
-# Paths that were modified in this PR.
+# Paths that were modified.
 WORKFLOW_README = REPO_ROOT / ".github" / "workflows" / "README.md"
 INDEX_DOC = REPO_ROOT / "docs" / "INDEX.md"
 OPERATIONS_DOC = REPO_ROOT / "docs" / "OPERATIONS.md"
@@ -34,54 +34,46 @@ PACKAGING_README = REPO_ROOT / "packaging" / "README.md"
 DEB_README = REPO_ROOT / "packaging" / "deb" / "README.md"
 MAIN_README = REPO_ROOT / "README.md"
 
-# Workflows that were removed from documentation scope.
-REMOVED_WORKFLOW_FILES = {"ci.yml", "runtime_pipeline.yml", "package.yml"}
-
-# The single workflow still documented after the PR.
+CURRENT_WORKFLOW_FILES = {
+    "ci.yml",
+    "runtime_pipeline.yml",
+    "package.yml",
+    "gh_repo_coupling.yml",
+}
 DOCUMENTED_WORKFLOW = "gh_repo_coupling.yml"
 
 
 # ---------------------------------------------------------------------------
-# Deleted files must not exist
+# Retained files must still exist on main
 # ---------------------------------------------------------------------------
 
 
-class TestDeletedFilesAbsent:
-    """Verify that files removed by this PR are no longer present on disk."""
+class TestRetainedFilesPresent:
+    """Verify that files still used by main remain present on disk."""
 
-    def test_json_machine_map_deleted(self) -> None:
-        assert not JSON_MAP_PATH.exists(), (
-            f"REPOSITORY_MACHINE_MAP.json was deleted in this PR but still exists at {JSON_MAP_PATH}"
-        )
+    def test_json_machine_map_present(self) -> None:
+        assert JSON_MAP_PATH.is_file(), f"Expected retained file missing: {JSON_MAP_PATH}"
 
-    def test_yaml_machine_map_deleted(self) -> None:
-        assert not YAML_MAP_PATH.exists(), (
-            f"REPOSITORY_MACHINE_MAP.yaml was deleted in this PR but still exists at {YAML_MAP_PATH}"
-        )
+    def test_yaml_machine_map_present(self) -> None:
+        assert YAML_MAP_PATH.is_file(), f"Expected retained file missing: {YAML_MAP_PATH}"
 
-    def test_declaration_implementation_matrix_deleted(self) -> None:
-        assert not DECL_MATRIX_DOC.exists(), (
-            f"DECLARATION_IMPLEMENTATION_MATRIX.md was deleted but still exists at {DECL_MATRIX_DOC}"
-        )
+    def test_declaration_implementation_matrix_present(self) -> None:
+        assert DECL_MATRIX_DOC.is_file(), f"Expected retained file missing: {DECL_MATRIX_DOC}"
 
-    def test_repository_guide_human_deleted(self) -> None:
-        assert not REPO_GUIDE_DOC.exists(), (
-            f"REPOSITORY_GUIDE_HUMAN.md was deleted but still exists at {REPO_GUIDE_DOC}"
-        )
+    def test_repository_guide_human_present(self) -> None:
+        assert REPO_GUIDE_DOC.is_file(), f"Expected retained file missing: {REPO_GUIDE_DOC}"
 
-    def test_documentation_consistency_todo_deleted(self) -> None:
-        assert not DOC_CONSISTENCY_TODO.exists(), (
-            f"DOCUMENTATION_CONSISTENCY_AND_COVERAGE_TODO.md was deleted but still exists at {DOC_CONSISTENCY_TODO}"
-        )
+    def test_documentation_consistency_todo_present(self) -> None:
+        assert DOC_CONSISTENCY_TODO.is_file(), f"Expected retained file missing: {DOC_CONSISTENCY_TODO}"
 
 
 # ---------------------------------------------------------------------------
-# .github/workflows/README.md — reduced to single workflow
+# .github/workflows/README.md — current multi-workflow state
 # ---------------------------------------------------------------------------
 
 
 class TestWorkflowREADME:
-    """Verify the updated .github/workflows/README.md content."""
+    """Verify the current .github/workflows/README.md content."""
 
     @pytest.fixture(autouse=True)
     def load_content(self) -> None:
@@ -91,20 +83,15 @@ class TestWorkflowREADME:
     def test_file_exists(self) -> None:
         assert WORKFLOW_README.is_file()
 
+    def test_documents_current_workflow_surface(self) -> None:
+        for workflow in CURRENT_WORKFLOW_FILES:
+            assert workflow in self.content
+
     def test_documents_gh_repo_coupling_workflow(self) -> None:
         assert DOCUMENTED_WORKFLOW in self.content
 
-    def test_does_not_mention_ci_yml(self) -> None:
-        """ci.yml was removed from the documented workflow list."""
-        assert "ci.yml" not in self.content
-
-    def test_does_not_mention_runtime_pipeline_yml(self) -> None:
-        """runtime_pipeline.yml was removed from the documented workflow list."""
-        assert "runtime_pipeline.yml" not in self.content
-
-    def test_does_not_mention_package_yml(self) -> None:
-        """package.yml was removed from the documented workflow list."""
-        assert "package.yml" not in self.content
+    def test_has_current_workflows_section(self) -> None:
+        assert "Current workflows" in self.content
 
     def test_has_structural_rule_section(self) -> None:
         assert "Structural rule" in self.content
@@ -115,30 +102,16 @@ class TestWorkflowREADME:
     def test_structural_rule_mentions_entrypoint(self) -> None:
         assert "entrypoint" in self.content.lower()
 
-    def test_does_not_have_documentation_rule_section(self) -> None:
-        """Documentation rule section was removed in this PR."""
-        assert "Documentation rule" not in self.content
-
-    def test_does_not_reference_operations_doc_in_rule(self) -> None:
-        """After removing the Documentation rule section, OPERATIONS.md is not cited here."""
-        # The Documentation rule section with its references to docs/OPERATIONS.md and
-        # docs/INDEX.md was deleted, so they should not appear in a "Documentation rule" context.
-        # We check that the section header itself is gone.
-        assert "## Documentation rule" not in self.content
-
-    def test_has_current_workflows_section(self) -> None:
-        assert "Current workflows" in self.content
+    def test_has_documentation_rule_section(self) -> None:
+        assert "Documentation rule" in self.content
 
     def test_coupling_workflow_describes_schedule(self) -> None:
-        """The gh_repo_coupling workflow description should mention its schedule."""
-        assert "15 minutes" in self.content or "schedule" in self.content.lower()
+        assert "15 minute" in self.content.lower() or "schedule" in self.content.lower()
 
     def test_coupling_workflow_describes_script(self) -> None:
-        """The description should name the executed script."""
         assert "run_gh_repo_coupling.py" in self.content
 
     def test_coupling_workflow_describes_commit_behavior(self) -> None:
-        """The description should explain the commit-on-change behavior."""
         assert "commit" in self.content.lower()
 
 
@@ -159,19 +132,19 @@ class TestIndexDocumentation:
         assert INDEX_DOC.is_file()
 
     def test_does_not_reference_declaration_implementation_matrix(self) -> None:
-        """DECLARATION_IMPLEMENTATION_MATRIX.md was deleted and must not be indexed."""
+        """DECLARATION_IMPLEMENTATION_MATRIX.md must not be indexed in docs/INDEX.md."""
         assert "DECLARATION_IMPLEMENTATION_MATRIX.md" not in self.content
 
     def test_does_not_reference_repository_guide_human(self) -> None:
-        """REPOSITORY_GUIDE_HUMAN.md was deleted and must not be indexed."""
+        """REPOSITORY_GUIDE_HUMAN.md must not be indexed in docs/INDEX.md."""
         assert "REPOSITORY_GUIDE_HUMAN.md" not in self.content
 
     def test_does_not_reference_json_machine_map(self) -> None:
-        """REPOSITORY_MACHINE_MAP.json was deleted and must not be indexed."""
+        """REPOSITORY_MACHINE_MAP.json must not be indexed in docs/INDEX.md."""
         assert "REPOSITORY_MACHINE_MAP.json" not in self.content
 
     def test_does_not_reference_yaml_machine_map(self) -> None:
-        """REPOSITORY_MACHINE_MAP.yaml was deleted and must not be indexed."""
+        """REPOSITORY_MACHINE_MAP.yaml must not be indexed in docs/INDEX.md."""
         assert "REPOSITORY_MACHINE_MAP.yaml" not in self.content
 
     def test_has_console_entrypoints_section(self) -> None:
@@ -211,7 +184,6 @@ class TestIndexDocumentation:
         assert "gguf_manager/manager.py" in self.content
 
     def test_has_heisenberg_godel_cross_reference(self) -> None:
-        """New cross-reference for the Heisenberg-Godel hypothesis was added."""
         assert "Heisenberg" in self.content or "heisenberg" in self.content.lower()
 
     def test_heisenberg_cross_reference_links_to_hypotheses(self) -> None:
@@ -239,7 +211,6 @@ class TestIndexDocumentation:
         assert "hyperspace_index_orbital.json" in self.content
 
     def test_does_not_reference_tools_core_only(self) -> None:
-        """tools/core_only was removed from INDEX.md scope."""
         assert "tools/core_only" not in self.content
 
     def test_launchers_section_present(self) -> None:
@@ -269,15 +240,12 @@ class TestOperationsDocumentation:
         assert DOCUMENTED_WORKFLOW in self.content
 
     def test_does_not_document_ci_yml(self) -> None:
-        """ci.yml was removed from the documented operational scope."""
         assert "ci.yml" not in self.content
 
     def test_does_not_document_runtime_pipeline_yml(self) -> None:
-        """runtime_pipeline.yml was removed from the documented operational scope."""
         assert "runtime_pipeline.yml" not in self.content
 
     def test_does_not_document_package_yml(self) -> None:
-        """package.yml was removed from the documented operational scope."""
         assert "package.yml" not in self.content
 
     def test_has_coupling_chain_section(self) -> None:
@@ -305,11 +273,9 @@ class TestOperationsDocumentation:
         assert ".github/workflows/" in self.content
 
     def test_does_not_mention_tools_core_only(self) -> None:
-        """tools/core_only was removed from OPERATIONS.md scope."""
         assert "tools/core_only" not in self.content
 
     def test_does_not_list_console_scripts(self) -> None:
-        """Console scripts were removed from OPERATIONS.md in this PR."""
         assert "ciel-sot-sync" not in self.content
         assert "ciel-sot-gui" not in self.content
 
@@ -323,7 +289,6 @@ class TestOperationsDocumentation:
         assert "local folder" in self.content.lower() or "folder documentation" in self.content.lower()
 
     def test_has_github_section(self) -> None:
-        """The .github/ section was added to document the GitHub control surface."""
         assert "### `.github/`" in self.content or "### .github/" in self.content or ".github/" in self.content
 
 
@@ -347,7 +312,6 @@ class TestPackagingReadme:
         assert "Installers" in self.content
 
     def test_describes_three_install_steps(self) -> None:
-        """Intro should now describe exactly 3 steps every installer performs."""
         assert "1." in self.content and "2." in self.content and "3." in self.content
 
     def test_step_1_installs_package(self) -> None:
@@ -360,7 +324,6 @@ class TestPackagingReadme:
         assert "GGUF" in self.content or "gguf" in self.content.lower()
 
     def test_has_available_models_table(self) -> None:
-        """Models table must list at least the default TinyLlama entry."""
         assert "tinyllama" in self.content.lower() or "TinyLlama" in self.content
 
     def test_models_table_includes_qwen_0_5b(self) -> None:
@@ -373,7 +336,6 @@ class TestPackagingReadme:
         assert "phi-2-q4" in self.content
 
     def test_none_model_option_documented(self) -> None:
-        """'none' should be listed to allow skipping model download."""
         assert "`none`" in self.content or "none" in self.content
 
     def test_has_quick_install_section(self) -> None:
@@ -411,16 +373,12 @@ class TestPackagingReadme:
         assert "install.ps1" in self.content
 
     def test_windows_skip_model_option(self) -> None:
-        """PowerShell install should show -Model none option."""
         assert "-Model none" in self.content
 
     def test_no_separate_three_surface_sections(self) -> None:
-        """The old README had separate sections for scripted/deb/android installers.
-        The new one is simplified — the Packaging surfaces heading should be gone."""
         assert "Packaging surfaces" not in self.content
 
     def test_no_ci_packaging_workflow_reference(self) -> None:
-        """package.yml reference was removed from packaging/README.md."""
         assert "package.yml" not in self.content
 
 
@@ -441,15 +399,12 @@ class TestPackagingDebReadme:
         assert DEB_README.is_file()
 
     def test_states_no_internet_required(self) -> None:
-        """The deb package install should be documented as offline."""
         assert "No internet" in self.content or "no internet" in self.content.lower() or "offline" in self.content.lower()
 
     def test_install_section_targets_linux_mint(self) -> None:
-        """Install section title was simplified to target Linux Mint."""
         assert "Linux Mint" in self.content
 
     def test_install_instructions_include_apt_install_f(self) -> None:
-        """The updated README added apt install -f for missing dependency resolution."""
         assert "apt install -f" in self.content or "apt-get install -f" in self.content
 
     def test_mentions_ciel_sot_install_model(self) -> None:
@@ -459,13 +414,9 @@ class TestPackagingDebReadme:
         assert "/var/lib/ciel/models" in self.content
 
     def test_no_longer_has_explicit_no_auto_download_paragraph(self) -> None:
-        """The explicit 'does not automatically download' clarification was removed.
-        This tests that the old boilerplate is gone."""
-        # The removed text was: "the package does **not** automatically download a GGUF model"
         assert "the package does **not** automatically download a GGUF model" not in self.content
 
     def test_no_longer_has_removed_offline_clarification_block(self) -> None:
-        """The 'Important clarification' block was removed from the deb README."""
         assert "Important clarification" not in self.content
 
     def test_has_prerequisites_section(self) -> None:
@@ -519,7 +470,6 @@ class TestMainReadme:
         assert MAIN_README.is_file()
 
     def test_new_subtitle_present(self) -> None:
-        """README was retitled to 'General Quantum Consciousness System'."""
         assert "General Quantum Consciousness System" in self.content
 
     def test_ciel_sot_agent_name_present(self) -> None:
@@ -559,18 +509,15 @@ class TestMainReadme:
         assert "Operational flow" in self.content or "operational flow" in self.content.lower()
 
     def test_operational_flow_describes_reduction_chain(self) -> None:
-        """The formal reduction chain should appear in the README."""
         assert "orbital state" in self.content.lower() or "bridge reduction" in self.content.lower()
 
     def test_has_couplings_section(self) -> None:
         assert "Couplings" in self.content or "couplings" in self.content.lower()
 
     def test_no_longer_has_repository_geometry_heading(self) -> None:
-        """'Repository geometry' section was replaced by 'System architecture'."""
         assert "## Repository geometry" not in self.content
 
     def test_no_longer_has_four_numbered_layer_sections(self) -> None:
-        """The 'Layer 1', 'Layer 2' etc. headings from the old README are gone."""
         assert "### 1. Native package layer" not in self.content
 
     def test_has_main_folders_section(self) -> None:
@@ -583,7 +530,6 @@ class TestMainReadme:
         assert "src/ciel_sot_agent/" in self.content
 
     def test_has_existing_launchers_section(self) -> None:
-        """New README has 'Existing launchers' section replacing old 'Execution surfaces'."""
         assert "Existing launchers" in self.content or "launchers" in self.content.lower()
 
     def test_existing_launchers_includes_gh_coupling_script(self) -> None:
@@ -596,7 +542,6 @@ class TestMainReadme:
         assert "Validation layer" in self.content or "validation" in self.content.lower()
 
     def test_integration_attractor_description_present(self) -> None:
-        """The 'Integration attractor' description should remain at the start."""
         assert "Integration attractor" in self.content or "integration attractor" in self.content.lower()
 
     def test_final_note_present(self) -> None:
@@ -606,9 +551,7 @@ class TestMainReadme:
         assert "live integration manifold" in self.content
 
     def test_does_not_have_entry_points_for_orientation_section(self) -> None:
-        """'Entry points for orientation' section was removed."""
         assert "Entry points for orientation" not in self.content
 
     def test_does_not_list_all_old_execution_entrypoints(self) -> None:
-        """The old exhaustive console-scripts listing section is gone."""
         assert "ciel-sot-sync-v2" not in self.content or "Installed console entrypoints" not in self.content

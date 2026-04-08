@@ -47,7 +47,9 @@ The goal of this bundle is to remove PyPI/network dependence from:
 ### Runtime wheelhouse
 - `vendor/wheels/runtime/`
 
-Expected runtime package family:
+Required runtime/build package family:
+- `setuptools`
+- `wheel`
 - `numpy`
 - `PyYAML`
 
@@ -80,10 +82,11 @@ bash tools/bootstrap/bootstrap_offline_runtime.sh
 ```
 
 The script:
-1. verifies that the required runtime wheels exist locally,
-2. installs the package with `--no-index` and `--find-links vendor/wheels/runtime`,
-3. optionally installs GUI extras if matching wheels are present,
-4. refuses to pretend success when required wheels are missing.
+1. verifies that the required runtime/build wheels exist locally,
+2. installs `setuptools` and `wheel` from the local runtime wheelhouse,
+3. installs the package with `--no-index` and `--find-links vendor/wheels/runtime`,
+4. optionally installs GUI extras if matching wheels are present,
+5. refuses to pretend success when required wheels are missing.
 
 ### Dev/test bootstrap
 ```bash
@@ -91,10 +94,11 @@ bash tools/bootstrap/bootstrap_offline_dev.sh
 ```
 
 The script:
-1. verifies runtime + dev wheel presence,
-2. installs the package with `.[dev]` using only local wheelhouses,
-3. optionally installs `.[dev,gui]` if local `flask` wheels are present,
-4. refuses to pretend success when required wheels are missing.
+1. verifies runtime/build + dev wheel presence,
+2. installs `setuptools` and `wheel` from the local runtime wheelhouse,
+3. installs the package with `.[dev]` using only local wheelhouses,
+4. optionally installs `.[dev,gui]` if local `flask` wheels are present,
+5. refuses to pretend success when required wheels are missing.
 
 ---
 
@@ -119,11 +123,10 @@ Populate:
 with the exact wheel files matching the manifest and target Python/platform matrix.
 
 Recommended first target matrix:
-- CPython 3.11
+- CPython 3.11+
 - Linux x86_64
 
 Optional later extensions:
-- CPython 3.12
 - Windows
 - macOS
 

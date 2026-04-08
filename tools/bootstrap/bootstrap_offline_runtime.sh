@@ -10,9 +10,9 @@ if [[ ! -d "$RUNTIME_WHEELS" ]]; then
 fi
 
 missing=0
-for pattern in "numpy-*.whl" "PyYAML-*.whl"; do
+for pattern in "setuptools-*.whl" "wheel-*.whl" "numpy-*.whl" "[Pp][Yy][Yy][Aa][Mm][Ll]-*.whl"; do
   if ! compgen -G "$RUNTIME_WHEELS/$pattern" > /dev/null; then
-    echo "[ERROR] Missing required runtime wheel matching: $pattern" >&2
+    echo "[ERROR] Missing required runtime/build wheel matching: $pattern" >&2
     missing=1
   fi
 done
@@ -22,6 +22,7 @@ if [[ $missing -ne 0 ]]; then
   exit 1
 fi
 
+python -m pip install --no-index --find-links "$RUNTIME_WHEELS" "setuptools>=68" wheel
 python -m pip install --no-index --find-links "$RUNTIME_WHEELS" -e "$ROOT"
 
 if compgen -G "$RUNTIME_WHEELS/flask-*.whl" > /dev/null; then
