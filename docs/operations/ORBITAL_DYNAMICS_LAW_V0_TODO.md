@@ -49,23 +49,25 @@ The operation is complete only when:
 ---
 
 ## Branch and baseline
-- original planned operation branch recorded in the first draft: `operation/orbital-dynamics-law-v0-20260407`
-- active Phase A branch after post-merge rebase on current main: `operation/orbital-dynamics-law-v0-phase-a-20260407`
-- active Phase B branch from current `main`: `operation/orbital-dynamics-law-v0-phase-b-20260407`
-- active Phase C branch stacked on Phase B branch head: `operation/orbital-dynamics-law-v0-phase-c-20260407`
-- current Phase C baseline from Phase B branch head: `fd8374e82fc97c49ada7be4985f16ec9fe2b87f1`
+Historical branch provenance:
+- `operation/orbital-dynamics-law-v0-phase-a-20260407`
+- `operation/orbital-dynamics-law-v0-phase-b-20260407`
+- `operation/orbital-dynamics-law-v0-phase-c-20260407`
+
+Current normalization branch:
+- `fix/post-merge-normalization-20260408`
+
+Current `main` baseline for this normalization pass:
+- `496a9e186a27693aa7454da8f5455897448b4ee5`
 
 ## Current rationale
-Current work now has:
-- Phase A semantic boundary docs,
-- explicit phased-state domain contracts from Phase B,
-- but still needs a clean separation between identity phase and selection relevance.
+Current `main` already contains:
+- Phase A semantic boundary hardening,
+- Phase B phased-state domain contracts,
+- Phase C identity-phase versus selection-relevance separation,
+- and the session handoff workstyle layer.
 
-The concrete leakage identified for Phase C is inside `src/ciel_sot_agent/phased_state.py`:
-- `h` was still being used both for deterministic identity phase and for raw energy through `f_seed(h)`.
-- that made hash-derived identity perturb selection/amplitude, which violates the intended separation.
-
-Phase C patchset addresses that leakage at the phased-state layer first.
+This normalization pass exists because several repo-memory surfaces still reflected branch-local state after those phases had already landed on `main`.
 
 ---
 
@@ -89,6 +91,10 @@ Make the boundary between analogy, science, architecture, operations, and execut
 ## Exit criteria
 - [ ] analogy and formal spec are no longer confusable in repo navigation or validation
 
+## Phase A status on `main`
+- Merged.
+- Remaining open point: no automated classification/validation hook yet checks that future docs preserve the boundary.
+
 ---
 
 # PHASE B — PHASED STATE CONTRACTS
@@ -109,6 +115,10 @@ Prefer a **strict contract model** unless implementation review proves permissiv
 ## Exit criteria
 - [x] there are no silent or ambiguous domain assumptions in phased-state entry functions
 
+## Phase B status on `main`
+- Merged.
+- Contract state: `compute_phase(h)` accepts only a finite real hash fraction in `[0.0, 1.0)`, and `f_conn(r)` accepts only a non-negative integer connection count.
+
 ---
 
 # PHASE C — RELATIONAL SEED SEPARATION
@@ -126,25 +136,42 @@ Separate identity phase from selection relevance.
 ## Exit criteria
 - [ ] orbital selection correlates with relevance instead of merely with deterministic object identity
 
-## Phase C progress entry — 2026-04-07
+## Phase C status on `main`
+- Merged.
+- Resolved in code: hash-derived `h` now drives only `phi`, while selection/amplitude flows through explicit relational metadata.
+- Remaining open point: the broader repo-wide audit of all possible selector surfaces is still not complete.
+
+---
+
+# POST-MERGE NORMALIZATION — AUDIT FOLLOW-UP
+
+## Goal
+Normalize repo-memory surfaces after Phase A/B/C landed on `main`.
+
+## Checklist
+- [x] remove stale branch-era status from `agentcrossinfo.md`
+- [x] normalize orbital ledger wording from branch-local to main-canonical state
+- [x] add `tests/test_phased_state.py` to `docs/INDEX.md`
+- [x] remove phased-state legacy residue and stale module wording
+
+## Exit criteria
+- [x] operational memory surfaces match the actual merged state of `main`
+
+## Normalization entry — 2026-04-08
 Resolved in this patchset:
-- hash-derived `h` now drives only `phi` / identity phase,
-- selection/amplitude now flows through explicit `selection_weight = relational_relevance(state)`,
-- relational metadata was expanded to include provenance, anchors, upstream/downstream counts, and sector-role weight,
-- dedicated tests now verify that changing content/hash alters `phi` while leaving selection weight stable when relational features are unchanged.
+- `agentcrossinfo.md` now reflects the current audit/normalization pass instead of stale branch-era orbital planning state,
+- `docs/INDEX.md` now exposes `tests/test_phased_state.py` and the active phased-state layer,
+- `src/ciel_sot_agent/phased_state.py` no longer contains the unused `f_seed(h)` helper and now describes its current semantics accurately,
+- this ledger now records Phase A/B/C as merged-on-main state rather than as active branch-local work.
 
 Changed files:
 - `src/ciel_sot_agent/phased_state.py`
-- `tests/test_phased_state.py`
+- `docs/INDEX.md`
+- `agentcrossinfo.md`
 - `docs/operations/ORBITAL_DYNAMICS_LAW_V0_TODO.md`
 
 Known limitation:
-- the broader repo-wide audit of all possible selector surfaces is not complete yet,
-- this patchset fixes the identified leakage in the phased-state layer first.
-
-Next readiness:
-- Phase D spec already exists,
-- the next meaningful implementation step is Phase E or a broader follow-up audit to verify no other selector path still couples raw identity phase to relevance.
+- no full suite or CI certification is recorded here for the new `main` head from within this patch flow.
 
 ---
 
@@ -237,11 +264,11 @@ Refactor package geometry only after semantics and runtime law stabilize.
 ---
 
 ## Current active phase
-- [x] Phase C — Relational Seed Separation advanced on branch
-- [ ] Phase E — Orbital Law Runtime V0 or broader selector audit is the next decision point
+- [ ] Phase E — Orbital Law Runtime V0 is the next implementation phase
+- [ ] Broader selector audit outside `phased_state.py` remains an optional pre-runtime verification pass
 
 ## Immediate next action
-- [ ] decide whether to continue with runtime-law wiring first or perform one more repo-wide audit for remaining identity-phase leakage outside `phased_state.py`
+- [ ] decide whether to enter runtime-law wiring directly or run one more repo-wide selector audit before Phase E
 
 ## Successor rule
 If this operation is later split into sub-operations, every successor must link back here and record which patchset boundary it inherits.
