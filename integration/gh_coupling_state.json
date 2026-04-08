@@ -1,11 +1,11 @@
 {
-  "last_generated_at": "2026-04-08T23:15:42.657145+00:00",
+  "last_generated_at": "2026-04-08T23:45:39.376729+00:00",
   "heads": {
     "agent": {
-      "sha": "63faec59e1e90acae2f7e7182057e0fcc13616bf",
-      "message": "refresh nonlocal cards for orbital, operations, and offline surfaces",
-      "timestamp": "2026-04-08T23:08:53Z",
-      "html_url": "https://github.com/AdrianLipa90/CIEL-_SOT_Agent/commit/63faec59e1e90acae2f7e7182057e0fcc13616bf"
+      "sha": "962f304d08ad68f6bcb6607bb6e2fd86e75b9d15",
+      "message": "Update live GH coupling state",
+      "timestamp": "2026-04-08T23:15:43Z",
+      "html_url": "https://github.com/AdrianLipa90/CIEL-_SOT_Agent/commit/962f304d08ad68f6bcb6607bb6e2fd86e75b9d15"
     },
     "demo": {
       "sha": "00bb9b060fada69891fa82ce4f7d799610b56693",
