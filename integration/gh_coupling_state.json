@@ -1,11 +1,11 @@
 {
-  "last_generated_at": "2026-04-08T22:46:23.788530+00:00",
+  "last_generated_at": "2026-04-08T23:15:42.657145+00:00",
   "heads": {
     "agent": {
-      "sha": "4685366608486aaeb57c76ee17a4b93db7382adf",
-      "message": "fix gh repo coupling launcher import path",
-      "timestamp": "2026-04-08T22:18:47Z",
-      "html_url": "https://github.com/AdrianLipa90/CIEL-_SOT_Agent/commit/4685366608486aaeb57c76ee17a4b93db7382adf"
+      "sha": "63faec59e1e90acae2f7e7182057e0fcc13616bf",
+      "message": "refresh nonlocal cards for orbital, operations, and offline surfaces",
+      "timestamp": "2026-04-08T23:08:53Z",
+      "html_url": "https://github.com/AdrianLipa90/CIEL-_SOT_Agent/commit/63faec59e1e90acae2f7e7182057e0fcc13616bf"
     },
     "demo": {
       "sha": "00bb9b060fada69891fa82ce4f7d799610b56693",
@@ -21,8 +21,6 @@
     }
   },
   "last_changed_keys": [
-    "agent",
-    "demo",
-    "desktop"
+    "agent"
   ]
 }
