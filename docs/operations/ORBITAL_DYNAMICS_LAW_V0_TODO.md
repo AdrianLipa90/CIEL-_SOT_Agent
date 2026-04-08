@@ -44,7 +44,23 @@ The operation is complete only when:
 - orbital selection is separated from raw identity phase,
 - the formal spec for orbital dynamics v0 exists,
 - runtime v0 law is wired in without semantic regression,
-- and performance/test evidence exists for the new path.
+- performance/test evidence exists for the new path,
+- and the repo-memory / nonlocal card layer is synchronized with the real post-merge state of `main`.
+
+---
+
+## Chronology of plans
+1. **Documentation predecessor** — establish repo geometry and execution surfaces before changing orbital runtime.
+2. **Phase A** — semantic boundary hardening between analogy / science / operations / executable surfaces.
+3. **Phase B** — strict `phased_state.py` contracts.
+4. **Phase C** — identity-phase versus selection-relevance separation.
+5. **Post-merge normalization** — repair repo-memory surfaces after A/B/C landed.
+6. **Phase D** — write orbital-law v0 formal spec before runtime changes.
+7. **Phase E** — wire orbital-law runtime path into the orbital engine.
+8. **Phase F** — remove first avoidable runtime overheads.
+9. **Phase G** — add semantic evidence fixtures and tests.
+10. **Post-Phase G stabilization** — restore missing semantic evidence on `main`, add offline dependency bundle scaffold, repair stale repository-map test, and repair offline bootstrap logic.
+11. **Current active plan** — refresh nonlocal cards / machine registries and repair the missing write-back or “auto-completion” path so machine-readable state tracks `main` instead of drifting behind it.
 
 ---
 
@@ -57,21 +73,26 @@ Historical merged branches:
 - `operation/orbital-dynamics-law-v0-phase-e-20260408`
 - `operation/orbital-dynamics-law-v0-phase-f-20260408`
 
-Phase G direct-repair commit target:
-- `main`
+Direct main repair / stabilization commits:
+- `a9f16bb5c97657420a09435368fc76e6ca41458b` — restore missing Phase G semantic evidence on `main`
+- `5bdd47687653dad8a3bb73fc28837c27b7e6638e` — add offline dependency bundle scaffold and docs
+- `b1463dca9cdaf7ff710b6943f49870ade95c997e` — fix stale repository-map test and offline bundle bootstrap
+- `870fe16b1171beb41f56f5fb35ca142890f42a68` — offline wheel payload added on `main`
 
-Current direct-repair baseline from `main`:
-- `594d9cd9a613d86ea48849098dfa35a1fdbbf2a7`
+Current baseline from `main`:
+- `870fe16b1171beb41f56f5fb35ca142890f42a68`
 
 ## Current rationale
-History on `main` shows merge commit `#219`, but the semantic evidence files were not actually present in the repository state afterwards.
-That means Phase G became a repo-state inconsistency rather than a purely logical next phase.
+Runtime and test surfaces are now operationally green on user-side local offline validation (`python -m pytest -q` full pass after offline install on Python 3.12 / Linux Mint 22.3).
 
-This direct repair exists to restore the missing evidence layer on `main` itself:
-- relevance fixture,
-- semantic evidence tests,
-- index visibility,
-- and the correct ledger state.
+The new dominant inconsistency is no longer runtime law correctness.
+It is repo-memory drift:
+- `docs/INDEX.md` reflects current repo state,
+- but `integration/hyperspace_index.json`, `integration/index_registry.yaml`, `integration/hyperspace_index_orbital.json`, and `integration/index_registry_orbital.yaml` lag behind,
+- orbital ledger memory also lags behind post-Phase-G stabilization,
+- and the current validator path diagnoses registry problems but does not write refreshed cards back.
+
+That means the next active work is a nonlocal-card / write-back repair, not another blind runtime patch.
 
 ---
 
@@ -159,10 +180,11 @@ Normalize repo-memory surfaces after Phase A/B/C landed on `main`.
 - [x] remove phased-state legacy residue and stale module wording
 
 ## Exit criteria
-- [x] operational memory surfaces match the actual merged state of `main`
+- [x] operational memory surfaces matched the then-current merged state of `main`
 
 ## Status on `main`
 - Merged.
+- Superseded by later repo-memory drift after Phase G stabilization and offline bundle work.
 
 ---
 
@@ -209,7 +231,8 @@ Introduce the effective orbital law into the existing orbital runtime without de
 
 ## Status on `main`
 - Merged.
-- Limitation still open: runtime path exists, but benchmark/certification evidence is not yet complete.
+- Runtime path exists and passes current full local test sweep.
+- Limitation still open: benchmark/certification evidence is not yet formalized as a dedicated harness.
 
 ---
 
@@ -265,6 +288,28 @@ Known limitation:
 
 ---
 
+# POST-PHASE G STABILIZATION — OFFLINE / TEST / MAIN REPAIR
+
+## Goal
+Stabilize the real `main` branch after Phase G by repairing missing semantic evidence, offline dependency bootstrap, stale repo-map tests, and local full-suite execution.
+
+## Checklist
+- [x] restore missing Phase G semantic evidence on `main`
+- [x] add offline dependency bundle scaffold and docs
+- [x] repair stale `tests/test_repository_machine_map.py` expectations to current `main`
+- [x] repair offline bootstrap scripts (`PyYAML` glob + build-backend wheels)
+- [x] add offline wheel payload on `main`
+- [x] confirm user-side local full `python -m pytest -q` pass after offline install
+
+## Exit criteria
+- [x] runtime/test surfaces are green on local offline validation
+
+## Status on `main`
+- Merged through direct main stabilization commits.
+- Remaining open point: machine-readable bundle manifest and nonlocal cards still lag behind the real post-merge state.
+
+---
+
 # PHASE H — PACKAGE GEOMETRY REFACTOR (LATE)
 
 ## Goal
@@ -280,13 +325,50 @@ Refactor package geometry only after semantics and runtime law stabilize.
 
 ---
 
+# PHASE I — NONLOCAL CARD REFRESH & AUTO-COMPLETION REPAIR
+
+## Goal
+Refresh machine-readable nonlocal cards and repair the missing write-back path so repo-memory tracks the real state of `main` instead of drifting behind it.
+
+## Diagnosis
+Current behavior:
+- `docs/INDEX.md` is fresher than the machine-readable card layer,
+- `integration/hyperspace_index.json` and `integration/index_registry.yaml` lag behind current repo surfaces,
+- orbital addendum cards also lag behind Phase E/F/G and later stabilization work,
+- `index_validator_v2.py` validates and reports issues but does not write refreshed cards back.
+
+## Target files
+- `integration/hyperspace_index.json`
+- `integration/index_registry.yaml`
+- `integration/hyperspace_index_orbital.json`
+- `integration/index_registry_orbital.yaml`
+- `docs/operations/ORBITAL_DYNAMICS_LAW_V0_TODO.md`
+- `vendor/manifests/offline_dependency_bundle_v1.yaml`
+
+## Checklist
+- [x] diagnose that current validator path is validate-only, not write-back
+- [x] identify stale machine-readable carriers that lag behind `docs/INDEX.md`
+- [ ] refresh primary hyperspace index to current `main`
+- [ ] refresh primary machine registry to current `main`
+- [ ] refresh orbital hyperspace addendum to current `main`
+- [ ] refresh orbital machine registry addendum to current `main`
+- [ ] update offline bundle manifest from scaffold-only semantics to populated-state semantics where justified by committed wheel payload
+- [ ] define or repair a deterministic write-back entrypoint for future auto-refresh
+- [ ] add or update a validation/test surface that detects docs > cards drift earlier
+
+## Exit criteria
+- [ ] nonlocal cards, registries, and operation memory match the actual merged state of `main`
+- [ ] repo has an explicit refresh/write-back path instead of validate-only diagnosis
+
+---
+
 ## Current active phase
-- [ ] No mandatory orbital-law phase is blocked on semantics now.
-- [ ] Optional next engineering phase: deeper Phase F follow-up (analytical/cached gradients).
-- [ ] Optional next structural phase: Phase H package geometry refactor later.
+- [ ] Active: Phase I — Nonlocal Card Refresh & Auto-Completion Repair
+- [ ] Optional parallel follow-up later: deeper Phase F analytical/cached gradients
+- [ ] Deferred later: Phase H package geometry refactor
 
 ## Immediate next action
-- [ ] decide whether the next patch should target analytical/cached gradients or shift to package-geometry cleanup after the semantic evidence layer is restored on `main`.
+- [ ] refresh machine-readable nonlocal cards and registries to the current post-offline `main` state before any further structural work
 
 ## Successor rule
 If this operation is later split into sub-operations, every successor must link back here and record which patchset boundary it inherits.
