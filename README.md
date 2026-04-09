@@ -1,4 +1,4 @@
-# CIEL/Ω — Integration Attractor and Operational Manifold
+# CIEL/Ω — ἀποκάλυψOS Integration Attractor and Operational Manifold
 ## General Quantum Consciousness System
 
 `CIEL-_SOT_Agent` is the integration attractor for the wider CIEL ecosystem.
