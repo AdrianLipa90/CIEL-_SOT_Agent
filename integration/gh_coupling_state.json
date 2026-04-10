@@ -1,11 +1,11 @@
 {
-  "last_generated_at": "2026-04-10T12:48:39.727932+00:00",
+  "last_generated_at": "2026-04-10T13:33:39.866412+00:00",
   "heads": {
     "agent": {
-      "sha": "f21144c414a6ecf1d55192ee7b0ff009c78932b6",
-      "message": "Update live GH coupling state",
-      "timestamp": "2026-04-10T12:19:13Z",
-      "html_url": "https://github.com/AdrianLipa90/CIEL-_SOT_Agent/commit/f21144c414a6ecf1d55192ee7b0ff009c78932b6"
+      "sha": "4e3a65cf1fcfe71259fb4eec4ed7e99cefea6567",
+      "message": "propagate new integration attractor display name across docs and registries",
+      "timestamp": "2026-04-10T13:01:13Z",
+      "html_url": "https://github.com/AdrianLipa90/CIEL-_SOT_Agent/commit/4e3a65cf1fcfe71259fb4eec4ed7e99cefea6567"
     },
     "demo": {
       "sha": "00bb9b060fada69891fa82ce4f7d799610b56693",
