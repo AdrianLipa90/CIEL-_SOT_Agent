@@ -83,9 +83,23 @@ Formal reading:
 - `integration/` — machine-readable registries, couplings, reports, and bridge artifacts.
 - `integration/Orbital/` — imported and extended orbital runtime.
 - `src/ciel_sot_agent/` — executable integration code.
+- `src/android_app/` — Android application scaffold (Kotlin + XML) for mobile-facing integration.
 - `scripts/` — thin repo-local wrappers.
 - `packaging/` — installation and packaging surfaces.
 - `tests/` — validation layer.
+
+
+## Android mobile scaffold
+
+A starter Android app is available under `src/android_app/` on branch `wtctg4`.
+
+Contents:
+- Gradle Kotlin DSL root project and `app` module,
+- launcher `MainActivity` (`com.ciel.sotagent`),
+- XML layout (`activity_main.xml`) and Material 3 theme resources,
+- quick start notes in `src/android_app/README.md`.
+
+Open `src/android_app` directly in Android Studio to sync Gradle and run the app on an emulator/device.
 
 ## Existing launchers
 
