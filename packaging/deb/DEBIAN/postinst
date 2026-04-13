@@ -15,11 +15,20 @@ echo "[ciel-sot-agent] Creating virtual environment at ${VENV_DIR}..."
 python3 -m venv "${VENV_DIR}"
 
 echo "[ciel-sot-agent] Installing from bundled wheels (offline)..."
-"${VENV_DIR}/bin/pip" install \
+if ! "${VENV_DIR}/bin/pip" install \
     --quiet \
     --no-index \
     --find-links "${WHEELS_DIR}" \
-    "ciel-sot-agent[gui]"
+    "ciel-sot-agent[gui]"; then
+    echo "[ciel-sot-agent] WARNING: Full offline dependency set is incomplete."
+    echo "[ciel-sot-agent] WARNING: Installing base package only (no dependency resolution)."
+    "${VENV_DIR}/bin/pip" install \
+        --quiet \
+        --no-index \
+        --no-deps \
+        --find-links "${WHEELS_DIR}" \
+        "ciel-sot-agent"
+fi
 
 echo "[ciel-sot-agent] Creating /var/lib/ciel/models directory..."
 mkdir -p /var/lib/ciel/models
@@ -31,4 +40,3 @@ echo "[ciel-sot-agent] Installation complete."
 echo "  Start the GUI:    ciel-sot-gui"
 echo "  Enable service:   sudo systemctl enable --now ciel-sot-gui"
 echo "  List models:      ciel-sot-install-model --list"
-
