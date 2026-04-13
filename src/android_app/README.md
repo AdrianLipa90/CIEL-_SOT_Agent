@@ -2,11 +2,19 @@
 
 Ten katalog zawiera szablon aplikacji Android (Kotlin + XML) dla CIEL SOT Agent.
 
+## Wymagania kompilacji
+
+- JDK 17 lub 21 (JDK 25 nie jest wspierane przez Android Gradle Plugin).
+- Android SDK zainstalowany lokalnie (ustawiony w `local.properties`).
+- Dostęp do repozytoriów Maven/Google (`dl.google.com`, `repo.maven.apache.org`).
+
 ## Uruchomienie lokalnie
 
-1. Otwórz `src/android_app` w Android Studio (Hedgehog lub nowsze).
-2. Pozwól IDE zsynchronizować Gradle.
-3. Uruchom moduł `app` na emulatorze lub urządzeniu.
+1. Skopiuj `local.properties.example` do `local.properties` i ustaw `sdk.dir`.
+2. Otwórz `src/android_app` w Android Studio (Hedgehog lub nowsze).
+3. Ustaw JDK projektu na 17 lub 21.
+4. Pozwól IDE zsynchronizować Gradle.
+5. Uruchom moduł `app` na emulatorze lub urządzeniu.
 
 ## Testy
 
