@@ -26,6 +26,7 @@ COMMANDS: dict[str, tuple[str, str]] = {
     "sapiens-client":           ("ciel_sot_agent.sapiens_client",          "main"),
     "runtime-evidence-ingest":  ("ciel_sot_agent.runtime_evidence_ingest", "main"),
     "gui":                      ("ciel_sot_agent.gui.app",                 "main"),
+    "control-panel":            ("ciel_sot_agent.control_panel_app",       "main"),
 }
 
 
