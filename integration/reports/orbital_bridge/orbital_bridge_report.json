@@ -55,36 +55,36 @@
     }
   },
   "state_manifest": {
-    "coherence_index": 0.946979547100677,
+    "coherence_index": 0.9464976717025114,
     "topological_charge_global": 0.15511717724274404,
     "phase_lock_error": 4.779719402406454,
     "beat_frequency_target_hz": 7.83,
     "spectral_radius_A": 1.2095634717702428,
     "fiedler_L": 0.04152962425516771,
     "zeta_enabled": true,
-    "nonlocal_phi_ab_mean": 0.004480132942105307,
-    "nonlocal_phi_berry_mean": -0.10329774849016389,
-    "nonlocal_eba_defect_mean": 0.04660636243191005,
+    "nonlocal_phi_ab_mean": 0.006714126601575024,
+    "nonlocal_phi_berry_mean": -0.10360424055697158,
+    "nonlocal_eba_defect_mean": 0.04981886508634676,
     "nonlocal_coherent_fraction": 1.0,
     "euler_bridge_closure_score": 0.5490203081103036,
     "euler_bridge_target_phase": 0.10513460948622075,
-    "effective_rh": 0.09228747836828385,
-    "timestamp": "2026-04-29T21:13:20.517885+00:00"
+    "effective_rh": 0.09342161024282687,
+    "timestamp": "2026-04-29T22:31:18.601095+00:00"
   },
   "health_manifest": {
-    "system_health": 0.6203594246558864,
+    "system_health": 0.619962597872381,
     "risk_level": "low",
     "closure_penalty": 4.779719402406454,
     "R_H": 0.0016936897192126584,
     "T_glob": 1.1422567257330287,
     "Lambda_glob": 0.15511717724274404,
-    "effective_rh": 0.09228747836828385,
+    "effective_rh": 0.09342161024282687,
     "rh_drivers": {
       "raw_rh": 0.0016936897192126584,
-      "eba_defect": 0.04660636243191005,
+      "eba_defect": 0.04981886508634676,
       "coherent_fraction": 1.0,
       "closure_score": 0.5490203081103036,
-      "phase_gap": 0.06634608014448214
+      "phase_gap": 0.06644363959938385
     },
     "recommended_action": "deep diagnostics allowed"
   },
@@ -102,13 +102,13 @@
     "writeback_gate": true,
     "rh_mode": "normal_operation",
     "rh_severity": "low",
-    "rh_effective": 0.09228747836828385,
+    "rh_effective": 0.09342161024282687,
     "rh_drivers": {
       "raw_rh": 0.0016936897192126584,
-      "eba_defect": 0.04660636243191005,
+      "eba_defect": 0.04981886508634676,
       "coherent_fraction": 1.0,
       "closure_score": 0.5490203081103036,
-      "phase_gap": 0.06634608014448214
+      "phase_gap": 0.06644363959938385
     },
     "notes": "Strong coherence and closure: allow deeper diagnostic/integration passes."
   },
@@ -454,12 +454,12 @@
     "status": "ok",
     "dominant_emotion": "love",
     "mood": 0.903467154343101,
-    "soul_invariant": 0.7784911532369682,
+    "soul_invariant": 0.7318945301102018,
     "ethical_score": 0.7830730540829481,
     "orbital_context": "orbital|mode=standard|R_H=0.0017|closure=4.7797|chirality=0.1551",
-    "phi_ab_mean": 0.004480132942105307,
-    "phi_berry_mean": -0.10329774849016389,
-    "eba_defect_mean": 0.04660636243191005,
+    "phi_ab_mean": 0.006714126601575024,
+    "phi_berry_mean": -0.10360424055697158,
+    "eba_defect_mean": 0.04981886508634676,
     "nonlocal_coherent_fraction": 1.0,
     "bridge_closure_score": 0.5490203081103036,
     "bridge_target_phase": 0.10513460948622075,

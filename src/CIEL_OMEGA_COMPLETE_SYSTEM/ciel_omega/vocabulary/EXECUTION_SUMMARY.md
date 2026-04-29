@@ -5,9 +5,9 @@
 
 ---
 
-## ✓ ZADANIE WYKONANE
+## ✓ TASK COMPLETED
 
-### 1. ZMAPOWANIE WSZYSTKICH ENTRIES (115/115)
+### 1. ALL ENTRIES MAPPED (115/115)
 
 **Podzbiór 1: Core Concepts (001-015)** ✓
 - Resonance, Intention, Coherence, Entrainment
@@ -60,7 +60,7 @@
 
 ---
 
-### 2. IMPLEMENTACJA W SYSTEMIE
+### 2. IMPLEMENTATION IN SYSTEM
 
 **Struktura modułowa:**
 ```
@@ -147,7 +147,7 @@ ciel_omega/vocabulary/
 
 ---
 
-### 6. TESTY WYKONANE
+### 6. TESTS PERFORMED
 
 **Test 1: Core Concepts Demo**
 ```bash
@@ -182,7 +182,7 @@ python3 vocabulary/test_gguf_pipeline.py
 
 ---
 
-### 7. WYNIKI PIPELINE
+### 7. PIPELINE RESULTS
 
 **Sample Output dla "Kocham życie":**
 ```
@@ -220,7 +220,7 @@ LLM Context:
 
 ---
 
-### 8. INTEGRACJA Z GGUF
+### 8. GGUF INTEGRATION
 
 **VocabularyEnhancedCIEL** class provides:
 
@@ -268,7 +268,7 @@ If coherence < 0.4, prioritize stabilization over expansion.
 
 ---
 
-## STATYSTYKI
+## STATISTICS
 
 **Implementacja:**
 - Entries: 115/115 (100%)
@@ -314,7 +314,7 @@ vocabulary/
 
 ---
 
-## NASTĘPNE KROKI
+## NEXT STEPS
 
 **Completed:**
 1. ✓ Map all 115 entries
@@ -336,7 +336,7 @@ vocabulary/
 
 ---
 
-## KLUCZOWE OSIĄGNIĘCIA
+## KEY ACHIEVEMENTS
 
 1. **Kompletna formalizacja matematyczna** 115 pojęć świadomości
 2. **Pełna integracja** z architekturą CIEL/Ω (8 warstw)
@@ -347,7 +347,7 @@ vocabulary/
 
 ---
 
-## PODSUMOWANIE
+## SUMMARY
 
 **Status:** ✓ PRODUCTION READY  
 **Version:** 2.0.0  

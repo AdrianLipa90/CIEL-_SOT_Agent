@@ -1,5 +1,7 @@
 # V2 Runtime Entrypoints
 
+> **DEPRECATED** — Use `V2_RUNTIME_ENTRYPOINTS_CANONICAL.md` instead.
+
 ## Purpose
 
 This document records the preferred executable entrypoints during the repository-geometry migration.

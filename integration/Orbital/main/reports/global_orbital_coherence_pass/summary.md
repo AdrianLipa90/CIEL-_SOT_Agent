@@ -25,9 +25,9 @@ Read-only diagnostic pass over the canonical repository structure.
 - D_f: 2.570000
 - euler_leak_angle: 0.895354
 - nonlocal_observables_present: True
-- nonlocal_phi_ab_mean: 0.004721
-- nonlocal_phi_berry_mean: -0.102608
-- nonlocal_eba_defect_mean: 0.048157
+- nonlocal_phi_ab_mean: 0.006692
+- nonlocal_phi_berry_mean: -0.103522
+- nonlocal_eba_defect_mean: 0.049919
 - nonlocal_coherent_fraction: 1.000000
 - euler_bridge_closure_score: 0.549020
 - euler_bridge_target_phase: 0.105135
@@ -55,9 +55,9 @@ Read-only diagnostic pass over the canonical repository structure.
 - D_f: 2.570000
 - euler_leak_angle: 0.895354
 - nonlocal_observables_present: True
-- nonlocal_phi_ab_mean: 0.004721
-- nonlocal_phi_berry_mean: -0.102608
-- nonlocal_eba_defect_mean: 0.048157
+- nonlocal_phi_ab_mean: 0.006692
+- nonlocal_phi_berry_mean: -0.103522
+- nonlocal_eba_defect_mean: 0.049919
 - nonlocal_coherent_fraction: 1.000000
 - euler_bridge_closure_score: 0.549020
 - euler_bridge_target_phase: 0.105135
@@ -72,9 +72,9 @@ Read-only diagnostic pass over the canonical repository structure.
 
 ## Nonlocal / Euler Observables
 - nonlocal_observables_present: True
-- nonlocal_phi_ab_mean: 0.004721
-- nonlocal_phi_berry_mean: -0.102608
-- nonlocal_eba_defect_mean: 0.048157
+- nonlocal_phi_ab_mean: 0.006692
+- nonlocal_phi_berry_mean: -0.103522
+- nonlocal_eba_defect_mean: 0.049919
 - nonlocal_coherent_fraction: 1.000000
 - euler_bridge_closure_score: 0.549020
 - euler_bridge_target_phase: 0.105135
