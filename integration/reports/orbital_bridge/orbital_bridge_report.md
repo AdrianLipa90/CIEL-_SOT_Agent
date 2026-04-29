@@ -6,31 +6,31 @@
 - steps: 20
 
 ## State Manifest
-- coherence_index: 0.9464976717025114
+- coherence_index: 0.9466662462527032
 - topological_charge_global: 0.15511717724274404
 - phase_lock_error: 4.779719402406454
 - beat_frequency_target_hz: 7.83
 - spectral_radius_A: 1.2095634717702428
 - fiedler_L: 0.04152962425516771
 - zeta_enabled: True
-- nonlocal_phi_ab_mean: 0.006714126601575024
-- nonlocal_phi_berry_mean: -0.10360424055697158
-- nonlocal_eba_defect_mean: 0.04981886508634676
+- nonlocal_phi_ab_mean: 0.006048399987874678
+- nonlocal_phi_berry_mean: -0.10361281214403857
+- nonlocal_eba_defect_mean: 0.048695034751734534
 - nonlocal_coherent_fraction: 1.0
 - euler_bridge_closure_score: 0.5490203081103036
 - euler_bridge_target_phase: 0.10513460948622075
-- effective_rh: 0.09342161024282687
-- timestamp: 2026-04-29T22:31:18.601095+00:00
+- effective_rh: 0.09302854246780297
+- timestamp: 2026-04-29T22:42:19.805588+00:00
 
 ## Health Manifest
-- system_health: 0.619962597872381
+- system_health: 0.6201007532887928
 - risk_level: low
 - closure_penalty: 4.779719402406454
 - R_H: 0.0016936897192126584
 - T_glob: 1.1422567257330287
 - Lambda_glob: 0.15511717724274404
-- effective_rh: 0.09342161024282687
-- rh_drivers: {'raw_rh': 0.0016936897192126584, 'eba_defect': 0.04981886508634676, 'coherent_fraction': 1.0, 'closure_score': 0.5490203081103036, 'phase_gap': 0.06644363959938385}
+- effective_rh: 0.09302854246780297
+- rh_drivers: {'raw_rh': 0.0016936897192126584, 'eba_defect': 0.048695034751734534, 'coherent_fraction': 1.0, 'closure_score': 0.5490203081103036, 'phase_gap': 0.06644636802028764}
 - recommended_action: deep diagnostics allowed
 
 ## Recommended Control
@@ -47,8 +47,8 @@
 - writeback_gate: True
 - rh_mode: normal_operation
 - rh_severity: low
-- rh_effective: 0.09342161024282687
-- rh_drivers: {'raw_rh': 0.0016936897192126584, 'eba_defect': 0.04981886508634676, 'coherent_fraction': 1.0, 'closure_score': 0.5490203081103036, 'phase_gap': 0.06644363959938385}
+- rh_effective: 0.09302854246780297
+- rh_drivers: {'raw_rh': 0.0016936897192126584, 'eba_defect': 0.048695034751734534, 'coherent_fraction': 1.0, 'closure_score': 0.5490203081103036, 'phase_gap': 0.06644636802028764}
 - notes: Strong coherence and closure: allow deeper diagnostic/integration passes.
 
 ## Bridge Metrics
@@ -81,12 +81,12 @@
 - status: ok
 - dominant_emotion: love
 - mood: 0.903467154343101
-- soul_invariant: 0.7318945301102018
+- soul_invariant: 0.6948878730467777
 - ethical_score: 0.7830730540829481
 - orbital_context: orbital|mode=standard|R_H=0.0017|closure=4.7797|chirality=0.1551
-- phi_ab_mean: 0.006714126601575024
-- phi_berry_mean: -0.10360424055697158
-- eba_defect_mean: 0.04981886508634676
+- phi_ab_mean: 0.006048399987874678
+- phi_berry_mean: -0.10361281214403857
+- eba_defect_mean: 0.048695034751734534
 - nonlocal_coherent_fraction: 1.0
 - bridge_closure_score: 0.5490203081103036
 - bridge_target_phase: 0.10513460948622075
