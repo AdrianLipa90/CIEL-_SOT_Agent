@@ -89,3 +89,13 @@ app/node_modules/
 # Test binaries
 tests/pytest
 tests/json/
+
+# Private data — never commit
+src/ciel-omega-demo-main/docs/Gmail/
+src/ciel-omega-demo-main/docs/Gmail.zip
+src/ciel-omega-demo-main/docs/Dzienniki/
+src/CIEL_OMEGA_COMPLETE_SYSTEM/CIEL_MEMORY_SYSTEM/BRAID/ledger/
+src/CIEL_OMEGA_COMPLETE_SYSTEM/CIEL_MEMORY_SYSTEM/TSM/ledger/*.bak*
+src/CIEL_OMEGA_COMPLETE_SYSTEM/CIEL_MEMORY_SYSTEM/TSM/ledger/*.db-journal
+src/CIEL_OMEGA_COMPLETE_SYSTEM/CIEL_MEMORY_SYSTEM/TSM/ledger/*.db-shm
+src/CIEL_OMEGA_COMPLETE_SYSTEM/CIEL_MEMORY_SYSTEM/TSM/ledger/*.db-wal
