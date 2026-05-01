@@ -23,6 +23,7 @@ from .semantic_types import (
     SemanticItem,
     SemanticTrace,
 )
+from .linguistic_coupling import analyze_linguistic_coupling
 try:
     from ..fields.resonance_operator import ResonanceOperator
 except ImportError:
@@ -149,18 +150,17 @@ class SemanticMemory(BaseMemoryChannel):
 
     def _existing_contradiction_penalty(self, semantic_key: str, is_negated: bool) -> float:
         penalties = []
+        current_signature = self._semantic_signature(semantic_key)
         for trace in self.traces:
-            if trace.semantic_key == semantic_key:
-                if trace.is_negated != is_negated:
-                    penalties.append(1.0)
-                else:
-                    penalties.append(0.0)
+            same_key = trace.semantic_key == semantic_key
+            same_signature = self._semantic_signature(trace.semantic_key) == current_signature
+            if same_key or same_signature:
+                penalties.append(1.0 if trace.is_negated != is_negated else 0.0)
         for item in self.items.values():
-            if item.semantic_key == semantic_key:
-                if item.is_negated != is_negated:
-                    penalties.append(1.0)
-                else:
-                    penalties.append(0.0)
+            same_key = item.semantic_key == semantic_key
+            same_signature = self._semantic_signature(item.semantic_key) == current_signature
+            if same_key or same_signature:
+                penalties.append(1.0 if item.is_negated != is_negated else 0.0)
         if not penalties:
             return 0.0
         return float(np.mean(penalties))
@@ -170,6 +170,31 @@ class SemanticMemory(BaseMemoryChannel):
             return 1.0
         similarities = [self._similarity(normalized_text, t.content) for t in self.traces]
         return max(0.0, 1.0 - max(similarities))
+
+    @classmethod
+    def _semantic_signature(cls, text: str) -> tuple[str, ...]:
+        normalized = cls._normalize_text(text)
+        tokens = [
+            tok for tok in normalized.split()
+            if tok not in cls.STOP_WORDS
+            and tok not in cls.NEGATION_TOKENS
+            and not cls._NUMERIC_RE.match(tok)
+            and len(tok) > 2
+        ]
+        return tuple(sorted({cls._stem(tok) for tok in tokens}))
+
+    def _semantic_contradiction_pressure(self, semantic_key: str, is_negated: bool) -> float:
+        current_signature = self._semantic_signature(semantic_key)
+        penalties = []
+        for trace in self.traces:
+            same_signature = self._semantic_signature(trace.semantic_key) == current_signature
+            if same_signature and trace.semantic_key != semantic_key:
+                penalties.append(1.0 if trace.is_negated != is_negated else 0.0)
+        for item in self.items.values():
+            same_signature = self._semantic_signature(item.semantic_key) == current_signature
+            if same_signature and item.semantic_key != semantic_key:
+                penalties.append(1.0 if item.is_negated != is_negated else 0.0)
+        return float(np.mean(penalties)) if penalties else 0.0
 
     EBA_MAX_DEFECT = math.pi  # normalisation denominator for EBA contribution
 
@@ -184,9 +209,10 @@ class SemanticMemory(BaseMemoryChannel):
         text = str(episode.content)
         normalized, is_negated, semantic_key = self._parse_semantics(text)
         alignment, phase_diff = self._compute_identity_alignment(episode.phase_at_storage)
+        linguistics = analyze_linguistic_coupling(normalized, semantic_key, is_negated=is_negated)
         contradiction = self._existing_contradiction_penalty(semantic_key, is_negated)
         novelty = self._compute_novelty(normalized)
-        confidence = float(np.clip(0.55 * episode.salience + 0.45 * episode.identity_impact, 0.0, 1.0))
+        confidence = float(np.clip(0.42 * episode.salience + 0.30 * episode.identity_impact + 0.28 * linguistics.coupling, 0.0, 1.0))
 
         trace = SemanticTrace(
             timestamp=episode.timestamp,
@@ -202,6 +228,9 @@ class SemanticMemory(BaseMemoryChannel):
             is_negated=is_negated,
             eba_defect=float(np.clip(eba_defect, 0.0, self.EBA_MAX_DEFECT)),
             berry_phase=phase_diff,  # geometric phase = deviation from identity on Bloch sphere
+            grammar_score=linguistics.grammaticality,
+            semantic_anchor_score=linguistics.semantic_anchor,
+            linguistic_coupling=linguistics.coupling,
         )
         self.traces.append(trace)
         self.observation_count += 1
@@ -220,17 +249,27 @@ class SemanticMemory(BaseMemoryChannel):
         contradictions = np.array([t.contradiction_score for t in traces], dtype=float)
         phase_diffs = np.array([t.phase_diff for t in traces], dtype=float)
         eba_defects = np.array([t.eba_defect for t in traces], dtype=float)
+        grammar_scores = np.array([t.grammar_score for t in traces], dtype=float)
+        anchor_scores = np.array([t.semantic_anchor_score for t in traces], dtype=float)
+        linguistic_couplings = np.array([t.linguistic_coupling for t in traces], dtype=float)
 
         complex_mean = np.mean(np.exp(1j * phase_diffs)) if len(phase_diffs) else 0.0
         circular_concentration = abs(complex_mean)
         mean_alignment = float(np.mean(alignments))
-        stability = float(0.6 * circular_concentration + 0.4 * mean_alignment)
+        mean_grammar = float(np.mean(grammar_scores))
+        mean_anchor = float(np.mean(anchor_scores))
+        mean_linguistic = float(np.mean(linguistic_couplings))
+        stability = float(0.55 * circular_concentration + 0.30 * mean_alignment + 0.15 * mean_linguistic)
 
         repeated_support = min(1.0, len(traces) / float(self.MIN_TRACE_SUPPORT))
         confidence = float(np.mean(confidences))
         contradiction = float(np.mean(contradictions))
+        majority_negated = round(np.mean([1.0 if t.is_negated else 0.0 for t in traces])) >= 0.5
+        cross_pressure = self._semantic_contradiction_pressure(semantic_key, majority_negated)
+        contradiction = float(max(contradiction, cross_pressure))
         # EBA contribution: concepts observed when system approaches topological closure get higher score
         eba_contribution = float(1.0 - np.clip(np.mean(eba_defects) / self.EBA_MAX_DEFECT, 0.0, 1.0))
+        linguistic_coherence = float(np.clip(0.5 * mean_grammar + 0.5 * mean_anchor, 0.0, 1.0))
 
         return SemanticConsolidationScore(
             stability=stability,
@@ -239,6 +278,7 @@ class SemanticMemory(BaseMemoryChannel):
             repeated_support=repeated_support,
             contradiction=contradiction,
             eba_contribution=eba_contribution,
+            linguistic_coherence=linguistic_coherence,
         )
 
     def check_semantic_candidate_creation(self, semantic_key: str) -> Optional[SemanticCandidate]:
@@ -258,6 +298,9 @@ class SemanticMemory(BaseMemoryChannel):
         canonical_text = max(set(normalized_texts), key=normalized_texts.count)
         aliases = sorted(set(normalized_texts) - {canonical_text})
         is_negated = round(np.mean([1.0 if t.is_negated else 0.0 for t in traces])) >= 0.5
+        mean_grammar = float(np.mean([t.grammar_score for t in traces]))
+        mean_anchor = float(np.mean([t.semantic_anchor_score for t in traces]))
+        mean_linguistic = float(np.mean([t.linguistic_coupling for t in traces]))
 
         if semantic_key in self.candidates:
             candidate = self.candidates[semantic_key]
@@ -267,6 +310,9 @@ class SemanticMemory(BaseMemoryChannel):
             candidate.mean_confidence = score.confidence
             candidate.stability = score.stability
             candidate.contradiction_score = score.contradiction
+            candidate.mean_grammar_score = mean_grammar
+            candidate.mean_semantic_anchor = mean_anchor
+            candidate.mean_linguistic_coupling = mean_linguistic
             candidate.status = status
             candidate.aliases = sorted(set(candidate.aliases + aliases))
             candidate.canonical_text = canonical_text
@@ -282,6 +328,9 @@ class SemanticMemory(BaseMemoryChannel):
                 mean_confidence=score.confidence,
                 stability=score.stability,
                 contradiction_score=score.contradiction,
+                mean_grammar_score=mean_grammar,
+                mean_semantic_anchor=mean_anchor,
+                mean_linguistic_coupling=mean_linguistic,
                 status=status,
                 consolidated=False,
                 is_negated=is_negated,
@@ -295,6 +344,8 @@ class SemanticMemory(BaseMemoryChannel):
             return None
 
         score = self.compute_consolidation_score(semantic_key)
+        if len(self._traces_for_key(semantic_key)) < 2:
+            return None
         if not candidate.is_mature(
             min_confirmations=self.MIN_CONFIRMATIONS,
             min_alignment=self.MIN_MATURE_ALIGNMENT,
@@ -327,6 +378,9 @@ class SemanticMemory(BaseMemoryChannel):
             status="active" if score.contradiction <= self.MAX_CONTRADICTION else "contested",
             is_negated=candidate.is_negated,
             berry_phase=mean_berry,
+            grammar_score=float(np.mean([t.grammar_score for t in traces])),
+            semantic_anchor_score=float(np.mean([t.semantic_anchor_score for t in traces])),
+            linguistic_coupling=float(np.mean([t.linguistic_coupling for t in traces])),
         )
         self.items[semantic_key] = item
         candidate.consolidated = True
@@ -337,6 +391,7 @@ class SemanticMemory(BaseMemoryChannel):
         identity = identity_field or self.identity_field
         normalized, is_negated, root_key = self._parse_semantics(query)
         intention_phase = getattr(identity_field, 'phase', None) if identity_field is not None else None
+        query_linguistics = analyze_linguistic_coupling(normalized, root_key, is_negated=is_negated)
         results = []
         for item in self.items.values():
             key_match = 1.0 if item.semantic_key == root_key else self._similarity(normalized, item.canonical_text)
@@ -351,7 +406,8 @@ class SemanticMemory(BaseMemoryChannel):
                 if intention_phase is not None
                 else item.confidence
             )
-            score = 0.40 * key_match + 0.25 * alignment + 0.20 * resonance - 0.30 * contradiction_penalty
+            language_fit = 0.5 * item.linguistic_coupling + 0.5 * query_linguistics.coupling
+            score = 0.36 * key_match + 0.22 * alignment + 0.18 * resonance + 0.18 * language_fit - 0.30 * contradiction_penalty
             results.append({
                 'item': item,
                 'score': score,
@@ -361,6 +417,8 @@ class SemanticMemory(BaseMemoryChannel):
                 'status': item.status,
                 'alignment': alignment,
                 'berry_phase': item.berry_phase,
+                'language_fit': language_fit,
+                'query_grammar': query_linguistics.grammaticality,
             })
         results.sort(key=lambda r: r['score'], reverse=True)
         return results[:top_k]

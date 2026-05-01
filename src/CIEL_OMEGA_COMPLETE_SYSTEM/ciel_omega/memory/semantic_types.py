@@ -25,6 +25,9 @@ class SemanticTrace:
     is_negated: bool = False
     eba_defect: float = 0.5   # EBA defect magnitude at observation time
     berry_phase: float = 0.0  # geometric phase (phase_diff, as angle on Bloch sphere)
+    grammar_score: float = 0.0
+    semantic_anchor_score: float = 0.0
+    linguistic_coupling: float = 0.0
 
 
 @dataclass
@@ -38,6 +41,9 @@ class SemanticCandidate:
     mean_confidence: float = 0.0
     stability: float = 0.0
     contradiction_score: float = 0.0
+    mean_grammar_score: float = 0.0
+    mean_semantic_anchor: float = 0.0
+    mean_linguistic_coupling: float = 0.0
     status: str = "detected"  # detected, mature, blocked
     consolidated: bool = False
     is_negated: bool = False
@@ -72,6 +78,9 @@ class SemanticItem:
     status: str = "active"  # active, contested, deprecated
     is_negated: bool = False
     berry_phase: float = 0.0  # mean geometric phase across consolidating traces
+    grammar_score: float = 0.0
+    semantic_anchor_score: float = 0.0
+    linguistic_coupling: float = 0.0
 
 
 @dataclass
@@ -82,11 +91,13 @@ class SemanticConsolidationScore:
     repeated_support: float
     contradiction: float
     eba_contribution: float = 0.0  # geometric: high when EBA defect is low (topological order)
-    w_s: float = 0.25
-    w_a: float = 0.22
-    w_c: float = 0.16
-    w_r: float = 0.20
-    w_e: float = 0.15  # EBA geometric weight
+    linguistic_coherence: float = 0.0
+    w_s: float = 0.22
+    w_a: float = 0.20
+    w_c: float = 0.15
+    w_r: float = 0.18
+    w_e: float = 0.12  # EBA geometric weight
+    w_l: float = 0.13  # linguistic-semantic coupling weight
     w_x: float = 0.28
 
     def compute_total(self) -> float:
@@ -95,7 +106,8 @@ class SemanticConsolidationScore:
             self.w_a * self.identity_alignment +
             self.w_c * self.confidence +
             self.w_r * self.repeated_support +
-            self.w_e * self.eba_contribution -
+            self.w_e * self.eba_contribution +
+            self.w_l * self.linguistic_coherence -
             self.w_x * self.contradiction
         )
 

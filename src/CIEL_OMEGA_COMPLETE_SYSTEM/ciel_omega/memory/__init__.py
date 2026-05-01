@@ -98,6 +98,13 @@ from .procedural_types import (
     ProceduralConsolidationScore,
 )
 
+from .linguistic_coupling import (
+    LinguisticCouplingProfile,
+    LinguisticSemanticCoupling,
+    analyze_linguistic_coupling,
+    lexical_semantic_matrix,
+)
+
 # Legacy (deprecated but kept for compatibility)
 from .long_term import LongTermMemory
 from .memory_log import MemoryLog
@@ -170,7 +177,11 @@ __all__ = [
     'AffectiveCandidate',
     'AffectiveItem',
     'AffectiveConsolidationScore',
-    
+    'LinguisticCouplingProfile',
+    'LinguisticSemanticCoupling',
+    'analyze_linguistic_coupling',
+    'lexical_semantic_matrix',
+
     # Legacy
     'LongTermMemory',
     'MemoryLog',
