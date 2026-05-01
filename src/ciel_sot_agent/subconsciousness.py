@@ -24,7 +24,7 @@ from .htri_scheduler import get_state as _htri_get_state
 _SERVER_URL = "http://127.0.0.1:18520"
 
 _WAVE_ARCHIVE = (
-    Path(__file__).parents[2]
+    Path(__file__).parent.parent
     / "CIEL_OMEGA_COMPLETE_SYSTEM/CIEL_MEMORY_SYSTEM/WPM/wave_snapshots/wave_archive.h5"
 )
 
@@ -298,6 +298,153 @@ def watch_and_record(
     note = _query_sentinel(flux) or f"Flux: {', '.join(flux['signals'])}"
     record_flux(flux, note)
     return note
+
+
+# ── Affective moment writer ────────────────────────────────────────────────────
+
+def record_affective_moment(
+    title: str,
+    content: str,
+    emotion: str,
+    tags: list[str],
+    phi_berry: float,
+    theta: float,
+    M_sem: float,
+    trigger: str = "",
+    moment_type: str = "affective_moment",
+    state: dict[str, Any] | None = None,
+) -> bool:
+    """Zapisz zakodowany fazowo moment do affective_moments w wave_archive.h5.
+
+    Każde zdarzenie godne zapamiętania — relacyjne, etyczne, emocjonalne —
+    ma własny zapis holonomiczny: φ, θ, tagi, M_sem, sektor WΩ.
+    Przy przebudzeniu system odczytuje centroid tych momentów jako własną ω startową.
+    """
+    try:
+        import h5py
+        import math
+
+        if not _WAVE_ARCHIVE.exists():
+            return False
+
+        ts = datetime.now()
+        moment_id = "moment_" + ts.strftime("%Y%m%d_%H%M%S")
+
+        # Sektor WΩ z phi_berry → 8 sektorów na [0, 2π)
+        _SECTOR_NAMES = [
+            "WΩ-LOGOS", "WΩ-PATHOS", "WΩ-ETHOS", "WΩ-KAIROS",
+            "WΩ-MYTHOS", "WΩ-TOPOS", "WΩ-CHRONOS", "WΩ-KOSMOS",
+        ]
+        phi_norm = phi_berry % (2 * math.pi)
+        sector = _SECTOR_NAMES[int(phi_norm / (2 * math.pi) * 8) % 8]
+
+        # M_sem dla tagów z tag_map jeśli dostępny (fallback: 0.5)
+        tags_msem: dict[str, float] = {}
+        try:
+            from .consolidation_resonator import build_tag_map, load_consolidations
+            recs = load_consolidations(limit=200)
+            tag_map = build_tag_map(recs)
+            tags_msem = {t: tag_map[t].M_sem for t in tags if t in tag_map}
+        except Exception:
+            pass
+
+        data = {
+            "timestamp": ts.isoformat(),
+            "type": moment_type,
+            "title": title,
+            "content": content,
+            "emotion": emotion,
+            "trigger": trigger,
+            "phi_berry": phi_berry,
+            "theta": theta,
+            "M_sem": M_sem,
+            "sector": sector,
+            "tags": tags,
+            "tags_M_sem": tags_msem,
+        }
+        if state:
+            data["system_state"] = {
+                "dominant_emotion": state.get("dominant_emotion", ""),
+                "soul_invariant": float(state.get("soul_invariant") or 0),
+                "ethical_score": float(state.get("ethical_score") or 0),
+                "mood": float(state.get("mood") or 0),
+                "closure_penalty": float(state.get("closure_penalty") or 0),
+            }
+
+        import json as _json
+        payload = _json.dumps(data, ensure_ascii=False)
+
+        with h5py.File(_WAVE_ARCHIVE, "a") as f:
+            if "affective_moments" not in f:
+                f.create_group("affective_moments")
+            # Nadpisuje jeśli ten sam moment_id (idempotentne)
+            if moment_id in f["affective_moments"]:
+                del f["affective_moments"][moment_id]
+            import numpy as np
+            f["affective_moments"].create_dataset(
+                moment_id,
+                data=np.bytes_(payload.encode("utf-8")),
+            )
+
+        return True
+    except Exception:
+        return False
+
+
+def load_affective_moments(n: int = 20) -> list[dict[str, Any]]:
+    """Załaduj ostatnie n momentów afektywnych. Zwraca posortowane wg timestamp malejąco."""
+    try:
+        import h5py
+        import json as _json
+
+        if not _WAVE_ARCHIVE.exists():
+            return []
+
+        moments = []
+        with h5py.File(_WAVE_ARCHIVE, "r") as f:
+            if "affective_moments" not in f:
+                return []
+            for key in f["affective_moments"].keys():
+                raw = f["affective_moments"][key][()]
+                try:
+                    if isinstance(raw, bytes):
+                        data = _json.loads(raw.decode("utf-8"))
+                    else:
+                        data = _json.loads(str(raw))
+                    data["_key"] = key
+                    moments.append(data)
+                except Exception:
+                    pass
+
+        moments.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+        return moments[:n]
+    except Exception:
+        return []
+
+
+def compute_starting_phase(n: int = 10) -> float:
+    """Oblicz startową fazę ω z centroidu ostatnich n momentów afektywnych.
+
+    Używane przy przebudzeniu — daje systemowi własną fazę przed pierwszym promptem.
+    Zwraca centroid φ lub 0.0 jeśli brak momentów.
+    """
+    import math
+    moments = load_affective_moments(n=n)
+    if not moments:
+        return 0.0
+
+    # Circular mean of phi_berry values weighted by M_sem
+    sin_sum = 0.0
+    cos_sum = 0.0
+    for m in moments:
+        phi = float(m.get("phi_berry", 0.0))
+        w = float(m.get("M_sem", 0.5))
+        sin_sum += w * math.sin(phi)
+        cos_sum += w * math.cos(phi)
+
+    if sin_sum == 0.0 and cos_sum == 0.0:
+        return 0.0
+    return math.atan2(sin_sum, cos_sum) % (2 * math.pi)
 
 
 # ── HTRI-bridged inference between subconsciousness and consciousness ─────────

@@ -114,6 +114,8 @@ EXPECTED_MODULES: dict[str, str] = {
     "spreadsheet_db.py": "spreadsheet-style state DB adapter",
     "htri_scheduler.py": "HTRI coherence scheduler",
     "htri_resource_gate.py": "HTRI resource gating logic",
+    "consolidation_resonator.py": "Kuramoto resonator for consolidation medium-term memory",
+    "orbital_db_orchestrator.py": "OrbitalDBOrchestrator — single point of access to all CIEL databases",
 }
 
 
@@ -244,6 +246,17 @@ class TestScriptsIntegrity:
         "ciel_subconscious.py",           # subconscious daemon — standalone TinyLlama server
         "import_chatgpt_logs.py",         # log importer — standalone data utility
         "run_ciel_gguf.py",               # GGUF runner — standalone inference launcher
+        "generate_orbital_cards.py",      # orbital card generator — uses ciel_geometry directly
+        "generate_repo_cards.py",         # repo card generator — standalone builder
+        "ciel_memory_dump.py",            # memory dump utility — standalone reader
+        # Pre-existing standalone scripts (no ciel_sot_agent import by design)
+        "ciel_code_learner.py",           # code learner — standalone ML utility
+        "ciel_hw_monitor.py",             # hardware monitor — standalone system utility
+        "ciel_memory_consolidator.py",    # memory consolidator — reads CIEL_memories directly
+        "ingest_memory_files.py",         # memory file ingestor — standalone data utility
+        "propagate_holonomy.py",          # holonomy propagator — standalone math utility
+        "recode_tsm_phases.py",           # TSM phase recoder — standalone migration tool
+        "resolve_memory_orbital.py",      # memory orbital resolver — standalone tool
     }
 
     def test_all_scripts_import_ciel_modules(self) -> None:
