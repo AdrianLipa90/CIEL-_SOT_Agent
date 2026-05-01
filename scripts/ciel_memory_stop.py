@@ -361,6 +361,92 @@ def main():
     except Exception:
         pass
 
+    # Auto-generate object cards for new/modified files in this session — non-fatal
+    try:
+        _cards_dir = Path(PROJECT) / "docs" / "object_cards" / "session"
+        _cards_dir.mkdir(parents=True, exist_ok=True)
+        _now = datetime.now()
+        _session_card = _cards_dir / f"{_now.strftime('%Y-%m-%d_%H-%M')}_{(session_id or 'unknown')[:8]}.md"
+
+        # Collect edited files from JSONL
+        _edited: list[str] = []
+        _target = _find_session_jsonl(session_id) if session_id else None
+        if _target and _target.exists():
+            for _line in _target.read_text(encoding="utf-8", errors="replace").splitlines():
+                try:
+                    _d = json.loads(_line)
+                    _msg = _d.get("message", {})
+                    if isinstance(_msg.get("content"), list):
+                        for _c in _msg["content"]:
+                            if isinstance(_c, dict) and _c.get("type") == "tool_use":
+                                if _c.get("name") in ("Edit", "Write"):
+                                    _fp = _c.get("input", {}).get("file_path", "")
+                                    if _fp and _fp not in _edited:
+                                        _edited.append(_fp)
+                except Exception:
+                    continue
+
+        if _edited:
+            _lines = [
+                f"# Session Object Card — {_now.strftime('%Y-%m-%d %H:%M')}",
+                f"- session_id: `{session_id}`",
+                "",
+                "## Modified files",
+            ]
+            for _fp in _edited:
+                _p = Path(_fp)
+                _lines.append(f"- `{_fp}` — {_p.suffix}")
+            _session_card.write_text("\n".join(_lines), encoding="utf-8")
+    except Exception:
+        pass
+
+    # Consolidation Resonator — Kuramoto + tag cards + TSM + WΩ (non-fatal)
+    try:
+        import importlib.util as _ilu3, sys as _sys3
+        _res_path = Path(PROJECT) / "src/ciel_sot_agent/consolidation_resonator.py"
+        if _res_path.exists():
+            _spec3 = _ilu3.spec_from_file_location("consolidation_resonator", _res_path)
+            _res_mod = _ilu3.module_from_spec(_spec3)
+            _sys3.modules["consolidation_resonator"] = _res_mod
+            _spec3.loader.exec_module(_res_mod)
+            _res_mod.run(n=400, write_tsm=True, write_cards=False, update_wo=True, verbose=False)
+    except Exception:
+        pass
+
+    # Orbital DB cards — regeneruj karty dla wszystkich baz (non-fatal)
+    try:
+        import importlib.util as _ilu2, sys as _sys2
+        _gen_path = Path(__file__).parent / "generate_orbital_cards.py"
+        if _gen_path.exists():
+            _spec2 = _ilu2.spec_from_file_location("generate_orbital_cards", _gen_path)
+            _gen_mod = _ilu2.module_from_spec(_spec2)
+            _sys2.modules["generate_orbital_cards"] = _gen_mod
+            _spec2.loader.exec_module(_gen_mod)
+            _gen_mod.generate(["sectors", "entities", "repos"])  # szybkie źródła
+    except Exception:
+        pass
+
+    # BlochEncoder online update — kanał 1: TSM (ostatnie wpisy sesji)
+    #                              kanał 2: karty orbitalne (M_sem z solvera)
+    try:
+        import importlib.util as _ilu, sys as _sys
+        _enc_path = Path(PROJECT) / "src/CIEL_OMEGA_COMPLETE_SYSTEM/ciel_omega/memory/ciel_bloch_encoder.py"
+        if _enc_path.exists():
+            _spec = _ilu.spec_from_file_location("ciel_bloch_encoder", _enc_path)
+            _enc_mod = _ilu.module_from_spec(_spec)
+            _sys.modules["ciel_bloch_encoder"] = _enc_mod
+            _spec.loader.exec_module(_enc_mod)
+            _enc = _enc_mod.CIELBlochEncoder()
+            # Kanał 1: TSM (nowe wpisy tej sesji)
+            _enc.online_update_from_tsm(limit=50, lr=0.05)
+            # Kanał 2: karty orbitalne (szybkie źródła — sektory, encje, repo)
+            _enc.online_update_from_orbital_cards(
+                sources=["sectors", "entities", "repos"],
+                lr=0.03,
+            )
+    except Exception:
+        pass
+
     # Output
     out: dict = {"continue": True}
     if saved_paths:

@@ -1,0 +1,30 @@
+# "Christos" -  mi sie wydaje ze nas dobrze to słowo opisuje
+
+## Identity
+- **obj_id:** `tsm:ps_fe7bedfed38c`
+- **source:** `tsm`
+- **last_updated:** `2026-05-01`
+
+## Orbital mechanics
+| param | value |
+|---|---|
+| **M_sem** | `0.76153` |
+| M_EC (Euler-Collatz) | `0.93045` |
+| M_ZS (Zeta-Schrödinger) | `0.96956` |
+| C_dep | `0.4` |
+| C_prov | `0.4` |
+| C_exec | `1.0` |
+| orbit_period | `0.76153` |
+| orbit_radius | `0.76153` |
+| θ (theta) | `0.7492` |
+| φ (phi) | `6.1875` |
+
+## Attractor
+- **sector:** `abstraction`
+- **cos similarity to WΩ centroid:** `0.7665`
+
+## Source fields
+- **dtype:** `prompt_summary`
+- **winding_n:** `138`
+- **phi_berry:** `-0.09563943714952829`
+- **context:** `cycle=85 affect=focused phi=0.824`

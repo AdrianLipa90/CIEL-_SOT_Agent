@@ -1,29 +1,34 @@
 {
   "couplings": {
     "constraints": {
-      "runtime": 0.01,
       "fields": 1.0,
-      "vocabulary": 1.0,
-      "memory": 0.01
-    },
-    "bridge": {
-      "fields": 0.01,
+      "runtime": 0.01,
       "memory": 0.01,
-      "vocabulary": 1.0,
-      "constraints": 0.7252734035631384,
-      "runtime": 1.0
+      "bridge": 0.82,
+      "vocabulary": 1.0
     },
     "fields": {
-      "vocabulary": 0.01,
+      "runtime": 0.01,
       "memory": 0.01,
-      "runtime": 0.01
-    },
-    "memory": {
-      "vocabulary": 0.01,
-      "runtime": 0.01
+      "bridge": 0.79,
+      "vocabulary": 0.01
     },
     "runtime": {
+      "memory": 0.8,
+      "bridge": 0.9,
       "vocabulary": 0.01
+    },
+    "memory": {
+      "bridge": 0.71,
+      "vocabulary": 0.01,
+      "runtime": 0.01
+    },
+    "bridge": {
+      "vocabulary": 1.0,
+      "fields": 0.01,
+      "memory": 0.01,
+      "constraints": 0.7083731446780042,
+      "runtime": 1.0
     }
   },
   "_wij_override_applied": true

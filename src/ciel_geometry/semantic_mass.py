@@ -12,10 +12,17 @@ For sectors and entities we proxy the components from available data:
 
 from __future__ import annotations
 
+import json
 import math
 from dataclasses import dataclass
+from pathlib import Path
 
 from .loader import SectorGeom, EntityGeom, load_sectors, load_couplings, load_entities
+
+_REPO_REGISTRY = (
+    Path(__file__).parent.parent.parent
+    / "integration/registries/repository_registry.json"
+)
 
 # Default weights (Foundation Pack §8, operator M_sem)
 _ALPHA = 0.30   # M_EC weight
@@ -140,17 +147,70 @@ def compute_entity_mass(
     )
 
 
+def compute_repo_mass(repo: dict) -> SemanticMassRecord:
+    """Compute semantic mass for a repository object (repository_registry.json).
+
+    Mapowanie z RELATIONAL_SEED_ORBIT_SOLVER_V0:
+      M_EC = mass (closure affinity — rola w łańcuchu redukcji)
+      M_ZS = 1 - |phi| / π (bliskość fazy do rezonansu Zeta-Schrödingera)
+      C_dep = upstream != local → wyższa zależność zewnętrzna
+      C_prov = role encoding (canonical > integration > cockpit)
+      C_exec = mass (aktywność wykonawcza = masa repo)
+    """
+    _ROLE_PROV = {
+        "canonical-foundations": 1.0,
+        "integration-attractor": 0.90,
+        "historical-theory-simulations": 0.75,
+        "desktop-runtime-surface": 0.65,
+        "cockpit-ui-education": 0.55,
+    }
+
+    raw_mass = float(repo.get("mass", 0.5))
+    phi = float(repo.get("phi", 0.0))
+    role = str(repo.get("role", ""))
+    upstream = str(repo.get("upstream", ""))
+    repo_id = str(repo.get("key", repo.get("identity", "unknown")))
+
+    M_EC = raw_mass
+    M_ZS = 1.0 - min(abs(phi) / math.pi, 1.0)
+    C_dep = 0.8 if "local" not in upstream else 0.4
+    C_prov = _ROLE_PROV.get(role, 0.5)
+    C_exec = raw_mass
+
+    M_sem = (_ALPHA * M_EC + _BETA * M_ZS + _CHI * C_dep
+             + _DELTA * C_prov + _EPS * C_exec)
+
+    a = max(1e-6, min(0.999, raw_mass))
+    T = math.sqrt(a ** 3 / max(1e-9, M_sem))
+
+    return SemanticMassRecord(
+        id=f"repo:{repo_id}",
+        M_sem=round(M_sem, 5),
+        M_EC=round(M_EC, 5),
+        M_ZS=round(M_ZS, 5),
+        C_dep=round(C_dep, 5),
+        C_prov=round(C_prov, 5),
+        C_exec=round(C_exec, 5),
+        orbit_period=round(T, 5),
+        orbit_radius=round(a, 5),
+    )
+
+
 def build_mass_table(
     include_entities: bool = True,
+    include_repos: bool = True,
     entity_limit: int = 40,
 ) -> list[SemanticMassRecord]:
-    """Compute semantic mass for all sectors and entities. Returns sorted by M_sem desc."""
+    """Compute semantic mass for sectors, entities, and repositories.
+
+    Source of truth: RELATIONAL_SEED_ORBIT_SOLVER_V0.
+    Returns sorted by M_sem desc.
+    """
     sectors   = load_sectors()
     couplings = load_couplings()
     records: list[SemanticMassRecord] = []
 
     for name, sector in sectors.items():
-        # Dependency: sum of all coupling weights to this sector
         coupling_sum = sum(w for (src, dst), w in couplings.items() if dst == name)
         records.append(compute_sector_mass(sector, coupling_sum))
 
@@ -161,6 +221,14 @@ def build_mass_table(
             entities = []
         for entity in entities[:entity_limit]:
             records.append(compute_entity_mass(entity))
+
+    if include_repos and _REPO_REGISTRY.exists():
+        try:
+            raw = json.loads(_REPO_REGISTRY.read_text())
+            for repo in raw.get("repositories", []):
+                records.append(compute_repo_mass(repo))
+        except Exception:
+            pass
 
     records.sort(key=lambda r: r.M_sem, reverse=True)
     return records

@@ -8,8 +8,8 @@
     "memory_policy": "session-first"
   },
   "session": {
-    "created_at": "2026-04-23T23:20:06.501356+00:00",
-    "updated_at": "2026-04-23T23:20:06.501619+00:00",
+    "created_at": "2026-05-01T01:49:28.174210+00:00",
+    "updated_at": "2026-05-01T01:49:28.174470+00:00",
     "turn_count": 1
   },
   "state_geometry": {
@@ -19,37 +19,37 @@
       "export_boundary_mode": "PROJECTED_ONLY"
     },
     "internal_cymatics": {
-      "coherence_index": 0.9402788231714668,
-      "closure_penalty": 4.779719402406454,
-      "system_health": 0.5899389127228932,
+      "coherence_index": 0.9433141491619036,
+      "closure_penalty": 4.576144291748092,
+      "system_health": 0.6243985067380758,
       "board_count": 763,
       "tau_system_count": 1
     },
-    "spin": 0.15511717724274404,
+    "spin": 0.19470848335311428,
     "axis": "truth",
     "attractor": "orbital-holonomic-stability"
   },
   "control_profile": {
     "mode": "deep",
     "phase_lock_enable": true,
-    "target_phase_shift": 1.2843032814475555,
-    "target_phase_memory": 5.119278538068647,
+    "target_phase_shift": 0.01587881836117738,
+    "target_phase_memory": 0.04456002892039556,
     "dt_override": 0.022,
     "zeta_coupling_scale": 0.38,
     "mu_phi": 0.18,
     "epsilon_hom": 0.22,
     "nonlocal_gate": true,
-    "euler_memory_lock": false,
-    "writeback_gate": false,
+    "euler_memory_lock": true,
+    "writeback_gate": true,
     "rh_mode": "normal_operation",
     "rh_severity": "low",
-    "rh_effective": 0.1961171342322798,
+    "rh_effective": 0.09721914402129282,
     "rh_drivers": {
-      "raw_rh": 0.0016936897192126584,
-      "eba_defect": 0.049911786308943676,
+      "raw_rh": 0.005032365272006213,
+      "eba_defect": 0.05434541190725449,
       "coherent_fraction": 1.0,
-      "closure_score": 0.4869712046337542,
-      "phase_gap": 1.0
+      "closure_score": 0.5423376184759512,
+      "phase_gap": 0.04516527353140216
     },
     "notes": "Strong coherence and closure: allow deeper diagnostic/integration passes."
   },
@@ -258,10 +258,10 @@
     {
       "role": "sapiens",
       "content": "Hello panel",
-      "timestamp": "2026-04-23T23:20:06.501607+00:00",
+      "timestamp": "2026-05-01T01:49:28.174461+00:00",
       "orbital_mode": "deep",
-      "coherence_index": 0.9402788231714668,
-      "closure_penalty": 4.779719402406454
+      "coherence_index": 0.9433141491619036,
+      "closure_penalty": 4.576144291748092
     }
   ],
   "inference_contract": {

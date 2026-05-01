@@ -1,0 +1,30 @@
+# nie. mowiłem "napisz plan i zapisz na pulpicie" XD
+
+## Identity
+- **obj_id:** `tsm:ps_d70177bed293`
+- **source:** `tsm`
+- **last_updated:** `2026-05-01`
+
+## Orbital mechanics
+| param | value |
+|---|---|
+| **M_sem** | `0.76254` |
+| M_EC (Euler-Collatz) | `0.93315` |
+| M_ZS (Zeta-Schrödinger) | `0.97039` |
+| C_dep | `0.4` |
+| C_prov | `0.4` |
+| C_exec | `1.0` |
+| orbit_period | `0.76254` |
+| orbit_radius | `0.76254` |
+| θ (theta) | `0.746` |
+| φ (phi) | `6.1902` |
+
+## Attractor
+- **sector:** `abstraction`
+- **cos similarity to WΩ centroid:** `0.7679`
+
+## Source fields
+- **dtype:** `prompt_summary`
+- **winding_n:** `140`
+- **phi_berry:** `-0.0930221850707291`
+- **context:** `cycle=77 affect=focused phi=1.192`

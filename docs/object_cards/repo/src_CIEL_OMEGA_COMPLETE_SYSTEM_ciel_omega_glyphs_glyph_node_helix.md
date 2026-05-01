@@ -1,0 +1,12 @@
+# glyph_node_helix.py — src/CIEL_OMEGA_COMPLETE_SYSTEM/ciel_omega/glyphs/glyph_node_helix.py
+
+## Identity
+- **path:** `src/CIEL_OMEGA_COMPLETE_SYSTEM/ciel_omega/glyphs/glyph_node_helix.py`
+- **last_indexed:** `2026-05-01`
+
+## Contents
+- **classes:** GlyphNode
+- **functions:** __init__, execute, transfer_to
+
+## Docstring
+—
