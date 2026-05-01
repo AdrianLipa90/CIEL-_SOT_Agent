@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from .language_backend import AuxiliaryBackend, LanguageBackend
-from .memory_prompt_context import summarize_sector_retrieval
+from .memory_prompt_context import build_semantic_speech_context, summarize_sector_retrieval
 
 _SERVER_CACHE: Dict[Tuple[str, str, int, int, int], "_ServerHandle"] = {}
 
@@ -58,6 +58,7 @@ def _summarize_state(ciel_state: Dict[str, Any]) -> str:
         "memorised": ciel_state.get("memorised"),
         "memory_governor": ciel_state.get("memory_governor"),
         "sector_memory_retrieval": summarize_sector_retrieval(ciel_state),
+        "semantic_speech": build_semantic_speech_context(ciel_state),
     }
     return json.dumps(summary, ensure_ascii=False)
 

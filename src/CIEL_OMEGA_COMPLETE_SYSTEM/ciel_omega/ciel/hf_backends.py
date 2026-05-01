@@ -6,6 +6,7 @@ import json
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 from .language_backend import AuxiliaryBackend, LanguageBackend
+from .memory_prompt_context import build_semantic_speech_context
 
 
 class PrimaryLLMBackend(LanguageBackend):
@@ -45,8 +46,9 @@ class PrimaryLLMBackend(LanguageBackend):
             "simulation": ciel_state.get("simulation"),
             "cognition": ciel_state.get("cognition"),
             "affect": ciel_state.get("affect"),
+            "semantic_speech": build_semantic_speech_context(ciel_state),
         }
-        return json.dumps(summary)
+        return json.dumps(summary, ensure_ascii=False)
 
     def generate_reply(
         self,
@@ -96,7 +98,7 @@ class AuxLLMBackend(AuxiliaryBackend):
             "cognition": ciel_state.get("cognition"),
             "affect": ciel_state.get("affect"),
         }
-        state_json = json.dumps(summary)
+        state_json = json.dumps(summary, ensure_ascii=False)
         return (
             "Evaluate the following reply for coherence and helpfulness given the state. "
             "Provide JSON with keys coherence, helpfulness, keywords, emotion.\n"

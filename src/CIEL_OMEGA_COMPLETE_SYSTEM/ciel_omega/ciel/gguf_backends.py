@@ -5,6 +5,7 @@ import os
 from typing import Any, Dict, List, Optional, Tuple
 
 from .language_backend import AuxiliaryBackend, LanguageBackend
+from .memory_prompt_context import build_semantic_speech_context
 
 
 _LLAMA_CACHE: Dict[Tuple[str, int, int, int], Any] = {}
@@ -27,11 +28,13 @@ def _format_dialogue(dialogue: List[Dict[str, str]]) -> str:
 
 
 def _summarize_state(ciel_state: Dict[str, Any]) -> str:
+    semantic = build_semantic_speech_context(ciel_state)
     summary = {
         "intention_vector": ciel_state.get("intention_vector"),
         "simulation": ciel_state.get("simulation"),
         "cognition": ciel_state.get("cognition"),
         "affect": ciel_state.get("affect"),
+        "semantic_speech": semantic,
     }
     return json.dumps(summary, ensure_ascii=False)
 
