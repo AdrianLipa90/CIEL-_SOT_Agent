@@ -19,7 +19,7 @@ from pathlib import Path
 
 # Dodaj CIEL na path
 _HERE = Path(__file__).resolve().parent
-_OMEGA = _HERE.parent
+_OMEGA = _HERE.parent.parent  # src/CIEL_OMEGA_COMPLETE_SYSTEM
 sys.path.insert(0, str(_OMEGA))
 
 from ciel_omega.htri.htri_local import LocalHTRI, OscillatorBank
