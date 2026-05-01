@@ -42,7 +42,7 @@ def _load_all() -> list[dict[str, Any]]:
         sys.exit(1)
 
     memories = []
-    with h5py.File(path, "r") as h5:
+    with h5py.File(path, "r", locking=False) as h5:
         mems = h5.get("memories", {})
         for mid in list(mems.keys()):
             grp = mems[mid]

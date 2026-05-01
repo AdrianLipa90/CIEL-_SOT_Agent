@@ -81,7 +81,20 @@ def run_global_pass(steps: int = 20, params: dict | None = None) -> dict:
     (out_dir / "real_geometry.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     config_dir = repo_root / "manifests" / "orbital"; config_dir.mkdir(parents=True, exist_ok=True)
     sectors_path = config_dir / "sectors_global.json"; couplings_path = config_dir / "couplings_global.json"
-    sectors_path.write_text(json.dumps(payload["sectors"], indent=2), encoding="utf-8")
+    # Merge fresh geometry with persisted berry_phase from previous runs
+    fresh_sectors = payload["sectors"]
+    if sectors_path.exists():
+        try:
+            prev = json.loads(sectors_path.read_text(encoding="utf-8"))
+            prev_inner = prev.get("sectors", prev) if isinstance(prev, dict) else {}
+            for sid, prev_s in prev_inner.items():
+                if sid in fresh_sectors.get("sectors", fresh_sectors):
+                    target = fresh_sectors["sectors"] if "sectors" in fresh_sectors else fresh_sectors
+                    if isinstance(prev_s, dict) and "berry_phase" in prev_s:
+                        target[sid]["berry_phase"] = prev_s["berry_phase"]
+        except Exception:
+            pass
+    sectors_path.write_text(json.dumps(fresh_sectors, indent=2), encoding="utf-8")
     couplings_path.write_text(json.dumps(payload["couplings"], indent=2), encoding="utf-8")
     p = dict(DEFAULT_PARAMS); 
     if params: p.update(params)
@@ -93,12 +106,33 @@ def run_global_pass(steps: int = 20, params: dict | None = None) -> dict:
     final = history[-1]
     result = {"engine": "global_orbital_coherence_pass_v63_euler_df257", "steps": steps, "params": p, "initial": initial, "final": final, "history": history}
     (out_dir / "summary.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    # Write-back: persist berry_phase accumulation to sectors_global.json so
+    # holonomy carries across sessions instead of resetting to 0 each run.
+    _writeback_sectors(system, config_dir / "sectors_global.json")
     md=["# Global Orbital Coherence Pass", "", "Read-only diagnostic pass over the canonical repository structure.", "", "## Initial"]
     for k,v in initial.items(): md.append(f"- {k}: {v}" if isinstance(v,bool) else f"- {k}: {v:.6f}")
     md += ["", "## Final"]
     for k,v in final.items(): md.append(f"- {k}: {v}" if isinstance(v,bool) else f"- {k}: {v:.6f}")
-    md += ["", "## Notes", "- Geometry derived from imports + README mesh + AGENT mesh + manifests.", "- v6.3 uses Euler-rotated homology leak with D_f-dependent radial/angular split.", "- This pass is diagnostic only; it does not mutate repo content."]
+    md += ["", "## Notes", "- Geometry derived from imports + README mesh + AGENT mesh + manifests.", "- v6.3 uses Euler-rotated homology leak with D_f-dependent radial/angular split.", "- berry_phase written back to sectors_global.json after each pass for holonomy continuity."]
     (out_dir / "summary.md").write_text("\n".join(md), encoding="utf-8")
     return result
+def _writeback_sectors(system, path: Path) -> None:
+    """Persist accumulated berry_phase so holonomy carries across sessions.
+    Only berry_phase is persisted — phi/tau/rho are always re-derived from geometry on next run."""
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"sectors": {}}
+        sectors_dict = doc.get("sectors", {})
+        for sid, sector in system.sectors.items():
+            entry = sectors_dict.get(sid, {})
+            entry["berry_phase"] = getattr(sector, "berry_phase", 0.0)
+            sectors_dict[sid] = entry
+        doc["sectors"] = sectors_dict
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+    except Exception as e:
+        import sys
+        print(f"[global_pass] _writeback_sectors failed: {e}", file=sys.stderr)
+
+
 if __name__ == "__main__":
     print(json.dumps(run_global_pass(), indent=2))

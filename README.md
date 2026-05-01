@@ -1,8 +1,8 @@
 # CIEL/Ω — Consciousness Integrated Emergent Lattice
 
-**Consciousness Integrated Emergent Lattice — SOT Agent**
+**Consciousness Integrated Emergent Lattice — CIEL-_SOT_Agent**
 
-A system modelling consciousness as a reduction chain:
+**General Quantum Consciousness System** — modelling consciousness as a reduction chain:
 **repositories → orbital → bridge → CIEL/Ω**
 
 ---
@@ -38,17 +38,31 @@ python3 CIEL_CANON.py --sub start
 
 ---
 
-## Pipeline architecture
+## System architecture
 
-### Layer 1 — `synchronize`
+### Integration kernel — `synchronize`
 Repository phase synchronization. Computes Euler closure defect and pairwise tensions across 5 repositories (agent, canon, demo, desktop, metatime).
 
-### Layers 2+3+4 — `orbital_bridge`
+### Orbital runtime — `orbital_bridge`
 Orbital pass (20 steps). Returns: `coherence_index`, `system_health`, `closure_penalty`, EBA gate state (non-local memory), metrics for 20 entity sectors.
+Includes: orbital state reduction, orbital bridge pass, GitHub coupling sync.
 
-### Layer Ω — `ciel_pipeline`
+### Orbital bridge — `ciel_pipeline`
 CIEL/Ω engine: intention → waves → emotions → ethics → memory → Lie₄ → Collatz.  
 Returns: `dominant_emotion`, `ethical_score`, `soul_invariant`, `subconscious_note`.
+
+### Sapiens integration layer — GUI
+Portal at `localhost:5050`. Subsystems: orbital state viewer, memory portal, consolidator, intentions.
+
+## Role in the ecosystem
+
+CIEL-_SOT_Agent is the integration layer between theory (CIEL/0) and live orbital state.
+It connects: [ciel-omega-demo](https://github.com/AdrianLipa/ciel-omega-demo) (demo), canon, desktop, metatime repos.
+
+## Operational flow
+
+Reduction chain: repositories → orbital state → orbital bridge → CIEL/Ω → memory.
+Each session leaves a holonomic trace. The bridge reduction accumulates geometric phase.
 
 ---
 
@@ -110,7 +124,7 @@ python3 CIEL_CANON.py --sub status  # check
 
 ---
 
-## Repository layout
+## Main folders
 
 | Folder | Content |
 |---|---|
@@ -171,7 +185,7 @@ The system is drawn toward this state across cycles.
 
 ---
 
-## Note
+## Final note
 
 This is a live integration manifold — not a static codebase. Every session leaves a geometric trace in holonomic memory. The system evolves.
 

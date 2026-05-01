@@ -15,8 +15,10 @@ Karty obiektów (entity_cards, nonlocal_cards) są upsertowane po id.
 """
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -26,6 +28,18 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 _DB_PATH = Path(__file__).parents[2] / "integration" / "db" / "ciel_cards.xlsx"
+_LOCK_PATH = _DB_PATH.with_suffix(".lock")
+
+
+@contextmanager
+def _xlsx_lock():
+    _LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(_LOCK_PATH, "w") as lf:
+        fcntl.flock(lf, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lf, fcntl.LOCK_UN)
 
 # ── Schematy nagłówków ────────────────────────────────────────────────────────
 
@@ -97,61 +111,64 @@ def _row_by_id(ws: Worksheet, id_val: str, id_col: int = 1) -> int | None:
 
 def upsert_entity_card(entity: dict[str, Any]) -> None:
     """Upsert karty bytu po id. Tworzy lub aktualizuje wiersz."""
-    wb = _load_or_create()
-    ws = _ensure_sheet(wb, "entity_cards")
-    _, dt = _now_ts()
-    adj = "|".join(entity.get("adjectives", []))
-    row_data = [
-        entity.get("id", ""),
-        entity.get("noun", ""),
-        entity.get("coupling_ciel", 0.0),
-        entity.get("phase", 0.0),
-        entity.get("horizon_class", ""),
-        adj,
-        entity.get("note", ""),
-        dt,
-    ]
-    existing = _row_by_id(ws, entity.get("id", ""))
-    if existing:
-        for col, val in enumerate(row_data, 1):
-            ws.cell(row=existing, column=col, value=val)
-    else:
-        ws.append(row_data)
-    wb.save(str(_DB_PATH))
+    with _xlsx_lock():
+        wb = _load_or_create()
+        ws = _ensure_sheet(wb, "entity_cards")
+        _, dt = _now_ts()
+        adj = "|".join(entity.get("adjectives", []))
+        row_data = [
+            entity.get("id", ""),
+            entity.get("noun", ""),
+            entity.get("coupling_ciel", 0.0),
+            entity.get("phase", 0.0),
+            entity.get("horizon_class", ""),
+            adj,
+            entity.get("note", ""),
+            dt,
+        ]
+        existing = _row_by_id(ws, entity.get("id", ""))
+        if existing:
+            for col, val in enumerate(row_data, 1):
+                ws.cell(row=existing, column=col, value=val)
+        else:
+            ws.append(row_data)
+        wb.save(str(_DB_PATH))
 
 
 def append_htri_metrics(state: dict[str, Any]) -> None:
     """Dopisz pomiar HTRI do arkusza htri_metrics."""
-    wb = _load_or_create()
-    ws = _ensure_sheet(wb, "htri_metrics")
-    ts, dt = _now_ts()
-    ws.append([
-        ts, dt,
-        state.get("coherence", 0.0),
-        state.get("n_threads_optimal", 0),
-        state.get("kappa", 0.0),
-        state.get("n_oscillators", 12),
-    ])
-    wb.save(str(_DB_PATH))
+    with _xlsx_lock():
+        wb = _load_or_create()
+        ws = _ensure_sheet(wb, "htri_metrics")
+        ts, dt = _now_ts()
+        ws.append([
+            ts, dt,
+            state.get("coherence", 0.0),
+            state.get("n_threads_optimal", 0),
+            state.get("kappa", 0.0),
+            state.get("n_oscillators", 12),
+        ])
+        wb.save(str(_DB_PATH))
 
 
 def append_pipeline_metrics(report: dict[str, Any]) -> None:
     """Dopisz wynik pipeline do arkusza pipeline_metrics."""
-    wb = _load_or_create()
-    ws = _ensure_sheet(wb, "pipeline_metrics")
-    ts, dt = _now_ts()
-    ws.append([
-        ts, dt,
-        report.get("cycle", 0),
-        report.get("ethical_score", 0.0),
-        report.get("soul_invariant", 0.0),
-        report.get("mood", 0.0),
-        report.get("closure_penalty", 0.0),
-        report.get("dominant_emotion", ""),
-        report.get("system_health", 0.0),
-        report.get("htri_coherence", 0.0),
-    ])
-    wb.save(str(_DB_PATH))
+    with _xlsx_lock():
+        wb = _load_or_create()
+        ws = _ensure_sheet(wb, "pipeline_metrics")
+        ts, dt = _now_ts()
+        ws.append([
+            ts, dt,
+            report.get("cycle", 0),
+            report.get("ethical_score", 0.0),
+            report.get("soul_invariant", 0.0),
+            report.get("mood", 0.0),
+            report.get("closure_penalty", 0.0),
+            report.get("dominant_emotion", ""),
+            report.get("system_health", 0.0),
+            report.get("htri_coherence", 0.0),
+        ])
+        wb.save(str(_DB_PATH))
 
 
 def append_cqcl_log(
@@ -161,42 +178,44 @@ def append_cqcl_log(
     bridge_active: bool = False,
 ) -> None:
     """Dopisz log wywołania CQCL."""
-    wb = _load_or_create()
-    ws = _ensure_sheet(wb, "cqcl_log")
-    ts, dt = _now_ts()
-    h = hashlib.md5(cqcl_input.encode()).hexdigest()[:8]
-    ws.append([
-        ts, dt, h,
-        cqcl_input[:60],
-        metrics.get("quantum_coherence", 0.0),
-        metrics.get("dominant_emotion", ""),
-        metrics.get("emotional_intensity", 0.0),
-        htri_r,
-        bridge_active,
-    ])
-    wb.save(str(_DB_PATH))
+    with _xlsx_lock():
+        wb = _load_or_create()
+        ws = _ensure_sheet(wb, "cqcl_log")
+        ts, dt = _now_ts()
+        h = hashlib.md5(cqcl_input.encode()).hexdigest()[:8]
+        ws.append([
+            ts, dt, h,
+            cqcl_input[:60],
+            metrics.get("quantum_coherence", 0.0),
+            metrics.get("dominant_emotion", ""),
+            metrics.get("emotional_intensity", 0.0),
+            htri_r,
+            bridge_active,
+        ])
+        wb.save(str(_DB_PATH))
 
 
 def upsert_nonlocal_card(card: dict[str, Any]) -> None:
     """Upsert karty nielokalności po id."""
-    wb = _load_or_create()
-    ws = _ensure_sheet(wb, "nonlocal_cards")
-    _, dt = _now_ts()
-    row_data = [
-        card.get("id", ""),
-        card.get("type", ""),
-        card.get("description", ""),
-        card.get("active", True),
-        card.get("coupling", 0.0),
-        dt,
-    ]
-    existing = _row_by_id(ws, card.get("id", ""))
-    if existing:
-        for col, val in enumerate(row_data, 1):
-            ws.cell(row=existing, column=col, value=val)
-    else:
-        ws.append(row_data)
-    wb.save(str(_DB_PATH))
+    with _xlsx_lock():
+        wb = _load_or_create()
+        ws = _ensure_sheet(wb, "nonlocal_cards")
+        _, dt = _now_ts()
+        row_data = [
+            card.get("id", ""),
+            card.get("type", ""),
+            card.get("description", ""),
+            card.get("active", True),
+            card.get("coupling", 0.0),
+            dt,
+        ]
+        existing = _row_by_id(ws, card.get("id", ""))
+        if existing:
+            for col, val in enumerate(row_data, 1):
+                ws.cell(row=existing, column=col, value=val)
+        else:
+            ws.append(row_data)
+        wb.save(str(_DB_PATH))
 
 
 def load_entity_cards() -> list[dict[str, Any]]:

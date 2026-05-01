@@ -5,7 +5,7 @@
       "orbital_type": "S",
       "dominant_spin": "resolve",
       "theta": 0.55,
-      "phi": 0.0,
+      "phi": 0.008407101541798351,
       "rhythm_ratio": 1.0,
       "amplitude": 0.9615,
       "coherence_weight": 1.0462,
@@ -14,14 +14,16 @@
       "damping": 0.1,
       "preference": 0.1815,
       "defect": 0.02,
-      "tau": 0.263
+      "tau": 0.2137286499960961,
+      "berry_phase": 0.003765255645481195,
+      "rho": 0.25255571006696265
     },
     "fields": {
       "orbital_level": 2,
       "orbital_type": "S",
       "dominant_spin": "stabilize",
       "theta": 0.75,
-      "phi": 1.047197551197,
+      "phi": 1.0282880404289005,
       "rhythm_ratio": 1.0,
       "amplitude": 0.9231,
       "coherence_weight": 0.9923,
@@ -30,14 +32,16 @@
       "damping": 0.1,
       "preference": 0.1631,
       "defect": 0.02,
-      "tau": 0.263
+      "tau": 0.3511891857303417,
+      "berry_phase": -0.008363519107944004,
+      "rho": 0.35169329731023785
     },
     "runtime": {
       "orbital_level": 2,
       "orbital_type": "F",
       "dominant_spin": "run",
       "theta": 1.55,
-      "phi": 2.094395102393,
+      "phi": 2.0609288439270075,
       "rhythm_ratio": 2.0,
       "amplitude": 0.8269,
       "coherence_weight": 0.8577,
@@ -46,14 +50,16 @@
       "damping": 0.14,
       "preference": 0.1169,
       "defect": 0.02,
-      "tau": 0.489
+      "tau": 0.4402990694624418,
+      "berry_phase": -0.05094253860016502,
+      "rho": 0.7703811358251169
     },
     "memory": {
       "orbital_level": 2,
       "orbital_type": "F",
       "dominant_spin": "stabilize",
       "theta": 1.05,
-      "phi": 3.14159265359,
+      "phi": 3.1456796919122048,
       "rhythm_ratio": 1.0,
       "amplitude": 0.9423,
       "coherence_weight": 1.0192,
@@ -62,14 +68,16 @@
       "damping": 0.1,
       "preference": 0.1723,
       "defect": 0.02,
-      "tau": 0.353
+      "tau": 0.33658814478312765,
+      "berry_phase": -0.004489364856301923,
+      "rho": 0.5656733120451982
     },
     "bridge": {
       "orbital_level": 2,
       "orbital_type": "P",
       "dominant_spin": "route",
       "theta": 1.45,
-      "phi": 4.188790204786,
+      "phi": 4.222899090591333,
       "rhythm_ratio": 2.0,
       "amplitude": 1.0,
       "coherence_weight": 1.1,
@@ -78,14 +86,16 @@
       "damping": 0.14,
       "preference": 0.2,
       "defect": 0.03,
-      "tau": 0.489
+      "tau": 0.24940172257094723,
+      "berry_phase": 0.05141580421012748,
+      "rho": 0.7188816059485331
     },
     "vocabulary": {
       "orbital_level": 2,
       "orbital_type": "S",
       "dominant_spin": "link",
       "theta": 0.7,
-      "phi": 5.235987755983,
+      "phi": 5.260965800581416,
       "rhythm_ratio": 1.0,
       "amplitude": 0.8462,
       "coherence_weight": 0.8846,
@@ -94,7 +104,9 @@
       "damping": 0.1,
       "preference": 0.1262,
       "defect": 0.02,
-      "tau": 0.263
+      "tau": 0.2361973411989025,
+      "berry_phase": 0.008767995707797864,
+      "rho": 0.33542881544468195
     }
   }
 }

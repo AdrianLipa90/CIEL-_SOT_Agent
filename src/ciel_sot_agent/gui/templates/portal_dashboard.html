@@ -466,7 +466,7 @@
       {% set metrics = [
         ('health',    status.system_health or 0,   '#00e676', 0.5),
         ('coherence', status.coherence_index or 0, '#21d4fd', 0.767),
-        ('closure',   min((status.closure_penalty or 0)/7.0, 1.0), '#ff6b6b', 0.74),
+        ('closure',   [(status.closure_penalty or 0)/7.0, 1.0]|min, '#ff6b6b', 0.74),
         ('ethical',   status.ethical_score or 0,   '#ffd700', 0.4),
         ('soul',      status.soul_invariant or 0,  '#b388ff', 0.9),
       ] %}

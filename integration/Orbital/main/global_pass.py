@@ -201,7 +201,18 @@ def run_global_pass(
     couplings_path = config_dir / 'couplings_global.json'
 
     if 'sectors' in payload:
-        sectors_path.write_text(json.dumps(payload['sectors'], indent=2), encoding='utf-8')
+        fresh = payload['sectors']
+        if sectors_path.exists():
+            try:
+                prev = json.loads(sectors_path.read_text(encoding='utf-8'))
+                prev_inner = prev.get('sectors', prev) if isinstance(prev, dict) else {}
+                target = fresh.get('sectors', fresh) if isinstance(fresh, dict) else {}
+                for sid, prev_s in prev_inner.items():
+                    if sid in target and isinstance(prev_s, dict) and 'berry_phase' in prev_s:
+                        target[sid]['berry_phase'] = prev_s['berry_phase']
+            except Exception:
+                pass
+        sectors_path.write_text(json.dumps(fresh, indent=2), encoding='utf-8')
     if 'couplings' in payload:
         couplings_path.write_text(json.dumps(payload['couplings'], indent=2), encoding='utf-8')
 
@@ -267,6 +278,9 @@ def run_global_pass(
     }
     (out_dir / 'summary.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
 
+    # Persist berry_phase accumulation so holonomy carries across sessions.
+    _writeback_sectors(system, sectors_path)
+
     md = ['# Global Orbital Coherence Pass', '', 'Read-only diagnostic pass over the canonical repository structure.', '', '## Initial']
     for k, v in initial.items():
         md.append(f'- {k}: {v}' if isinstance(v, bool) else f'- {k}: {v:.6f}')
@@ -294,6 +308,26 @@ def run_global_pass(
            '- This pass is diagnostic only; it does not mutate repo content.']
     (out_dir / 'summary.md').write_text('\n'.join(md), encoding='utf-8')
     return result
+
+
+def _writeback_sectors(system, path: Path) -> None:
+    """Persist accumulated berry_phase from final dynamics state so holonomy carries across sessions.
+    Only berry_phase is persisted — phi/tau/rho are always re-derived from geometry on next run."""
+    try:
+        doc = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {'sectors': {}}
+        sectors_dict = doc.get('sectors', doc) if isinstance(doc, dict) else {}
+        for sid, sector in system.sectors.items():
+            entry = sectors_dict.get(sid, {})
+            entry['berry_phase'] = getattr(sector, 'berry_phase', 0.0)
+            sectors_dict[sid] = entry
+        if 'sectors' in doc:
+            doc['sectors'] = sectors_dict
+        else:
+            doc = {'sectors': sectors_dict}
+        path.write_text(json.dumps(doc, indent=2), encoding='utf-8')
+    except Exception as e:
+        import sys as _sys
+        print(f'[global_pass] _writeback_sectors failed: {e}', file=_sys.stderr)
 
 
 if __name__ == '__main__':

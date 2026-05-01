@@ -128,8 +128,10 @@ def get_db(path: Path | None = None) -> sqlite3.Connection:
     """Return a WAL-mode connection to the CIEL state database."""
     db_path = path or _DB_PATH
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path), check_same_thread=False)
+    conn = sqlite3.connect(str(db_path), check_same_thread=False, timeout=10)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=10000")
     if str(db_path) not in _schema_initialized:
         _ensure_schema(conn)
         _schema_initialized.add(str(db_path))

@@ -205,7 +205,7 @@ def _load_wave_memory(root: Path) -> str:
                 return ""
 
         entries = []
-        with h5py.File(h5_path, "r") as f:
+        with h5py.File(h5_path, "r", locking=False) as f:
             for k in f["memories"].keys():
                 g = f["memories"][k]
                 t = rd(g, "D_type")
@@ -339,7 +339,7 @@ def _build_identity_preamble(root: Path) -> str:
         import h5py, numpy as np
         h5 = root / "src/CIEL_OMEGA_COMPLETE_SYSTEM/CIEL_MEMORY_SYSTEM/WPM/wave_snapshots/wave_archive.h5"
         if h5.exists():
-            with h5py.File(h5, "r") as f:
+            with h5py.File(h5, "r", locking=False) as f:
                 entries = []
                 for k in f["memories"].keys():
                     g = f["memories"][k]
@@ -1294,17 +1294,32 @@ def register_routes(app: Flask) -> None:
                 _sys.path.insert(0, _src)
             from ciel_geometry.layout import build_layout  # noqa: PLC0415
             layout = build_layout()
+
+            def _color_hex(c: object) -> str:
+                if isinstance(c, str):
+                    return c
+                if isinstance(c, (list, tuple)) and len(c) >= 3:
+                    return "#{:02x}{:02x}{:02x}".format(
+                        int(c[0] * 255), int(c[1] * 255), int(c[2] * 255)
+                    )
+                return "#5dade2"
+
             return jsonify({
                 "nodes": [
                     {
                         "id": n.id, "x": n.x, "y": n.y,
                         "label": n.label, "size": n.size,
-                        "color": n.color, "horizon_class": n.horizon_class,
+                        "color": _color_hex(n.color),
+                        "horizon_class": n.horizon_class,
+                        "node_type": n.node_type,
                     }
                     for n in layout.nodes
                 ],
                 "edges": [
-                    {"src": e.src, "dst": e.dst, "weight": e.weight}
+                    {
+                        "src": e.src, "dst": e.dst, "weight": e.weight,
+                        "arc_points": e.arc_points,
+                    }
                     for e in layout.edges
                 ],
                 "metadata": layout.metadata,
@@ -1440,11 +1455,22 @@ def register_routes(app: Flask) -> None:
         hunches = []
         for line in _HUNCHES_FILE.read_text().splitlines():
             line = line.strip()
-            if line:
-                try:
-                    hunches.append(json.loads(line))
-                except Exception:
-                    pass
+            if not line:
+                continue
+            try:
+                h = json.loads(line)
+                # normalise alternate formats → canonical {ts, hunch, tags, context}
+                if "ts" not in h:
+                    h["ts"] = h.pop("timestamp", "")
+                if "hunch" not in h:
+                    h["hunch"] = h.pop("text", h.pop("content", ""))
+                if "tags" not in h:
+                    h["tags"] = []
+                if "context" not in h:
+                    h["context"] = ""
+                hunches.append(h)
+            except Exception:
+                pass
         return sorted(hunches, key=lambda x: x.get("ts", ""), reverse=True)
 
     @app.route("/api/hunches/add", methods=["POST"])
@@ -1583,7 +1609,7 @@ def register_routes(app: Flask) -> None:
     @app.route("/portal/consolidator", methods=["GET"])
     def portal_consolidator() -> Any:
         st = _consolidator_status()
-        results = _consolidator_recent(5)
+        results = _consolidator_recent(10000)
         return render_template("portal_consolidator.html", status=st, results=results)
 
     # ── Plans ─────────────────────────────────────────────────────────────────

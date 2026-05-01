@@ -37,6 +37,12 @@ packaging/vendor/*.whl
 packaging/vendor/*.tar.gz
 packaging/vendor/*.zip
 
+# Generated orbital/tag/consolidation cards (rebuild from scripts)
+docs/object_cards/db/
+docs/object_cards/orbital/
+docs/object_cards/repo/
+docs/object_cards/session/
+
 # Generated card/catalog database library (rebuild from scripts, do not commit binaries)
 integration/registries/definitions/db_library/*.sqlite
 integration/registries/definitions/db_library/*-journal

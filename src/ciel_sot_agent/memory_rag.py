@@ -64,7 +64,7 @@ def search_wave_archive(query: str, root: Path, top_k: int = 4) -> list[dict[str
                 return ""
 
         candidates: list[tuple[float, str, str, str]] = []
-        with h5py.File(h5_path, "r") as f:
+        with h5py.File(h5_path, "r", locking=False) as f:
             for k in f["memories"].keys():
                 g = f["memories"][k]
                 sense = rd(g, "D_sense")

@@ -7,7 +7,7 @@
   {{ portal_navbar('consolidator') }}
   <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:16px;">
     <span class="gradient-text-gold" style="font-size:1.3rem; font-weight:700;">Konsolidator Pamięci</span>
-    <span style="color:var(--col-text-dim); font-size:.78rem;">lokalna podświadomość · qwen2.5-0.5b</span>
+    <span style="color:var(--col-text-dim); font-size:.78rem;">podświadomość holonomiczna · claude-haiku</span>
   </div>
 
   <!-- Status + kontrola -->
@@ -141,7 +141,7 @@ async function toggleConsolidator() {
       if (d.ok) {
         _isRunning = true;
         updateUI();
-        setMsg('Konsolidator uruchomiony (może chwilę potrwać ładowanie modelu).');
+        setMsg('Konsolidator uruchomiony.');
       } else {
         setMsg('Błąd: ' + (d.error || '?'), false);
       }
