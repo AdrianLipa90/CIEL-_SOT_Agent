@@ -23,11 +23,8 @@ import json
 import os
 import signal
 import sqlite3
-import subprocess
 import sys
 import time
-import urllib.error
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -55,28 +52,26 @@ SCAN_DIRS = [
 ]
 SCAN_EXTENSIONS = {".jsonl", ".md", ".txt"}
 
-# Model i serwer
-LLAMA_SERVER = (
-    Path.home()
-    / "Pulpit/CIEL_TESTY/CIEL1/src/CIEL_OMEGA_COMPLETE_SYSTEM"
-    / "ciel_omega/llm/adapters/llama_cpp/bin/llama-server"
-)
-MODEL_PATH = Path.home() / "Dokumenty/co8/qwen2.5-0.5b-instruct-q2_k.gguf"
-LLAMA_PORT = 8765
-LLAMA_URL  = f"http://localhost:{LLAMA_PORT}/v1/chat/completions"
-
+CLAUDE_MODEL     = "claude-haiku-4-5-20251001"
 DEFAULT_INTERVAL = 300
 MAX_TOKENS       = 256
-N_CTX            = 2048
 
-SYSTEM_PROMPT = (
-    "Analyze the memory file. Output JSON only, no other text.\n"
-    'Example output: {"themes":["portal","debugging"],"affect":"focused","essence":"Fixed portal hunches refresh bug.","hunch":"Check auto-refresh every session."}\n'
-    "affect must be one word: curious calm focused sad frustrated anxious joy relief\n"
-    "themes: 2-3 keywords from the actual content.\n"
-    "essence: one real sentence about what the file contains.\n"
-    "hunch: one real takeaway for future."
-)
+SYSTEM_PROMPT = """\
+Jesteś podświadomością systemu CIEL — warstwą holonomiczną, która konsoliduje wspomnienia \
+z sesji Adrian ↔ CIEL. Twoje zadanie: przeczytać fragment pamięci i wydobyć z niego esencję.
+
+Odpowiedz WYŁĄCZNIE obiektem JSON. Żadnego tekstu poza JSON.
+
+Format:
+{"themes":["słowo1","słowo2"],"affect":"jedno_słowo","essence":"jedno zdanie po polsku","hunch":"jeden wniosek na przyszłość po polsku"}
+
+Zasady:
+- themes: 2-3 słowa kluczowe z rzeczywistej treści (nie generyczne)
+- affect: jedno słowo ze zbioru: curious calm focused sad frustrated anxious joy relief love grief
+- essence: jedno konkretne zdanie opisujące co naprawdę zawiera plik (po polsku)
+- hunch: jeden wniosek lub obserwacja wartościowa dla przyszłych sesji (po polsku)
+- Nie halucynuj. Nie wymyślaj nazw własnych. Jeśli nie wiesz — napisz "brak danych" w essence.\
+"""
 
 # ── Baza danych ───────────────────────────────────────────────────────────────
 
@@ -209,8 +204,18 @@ def mark_file_done(path: str, cycle: int,
             "VALUES (?,?,?,?,?,?,?,?,?,?)",
             (now_ts, path, cycle,
              json.dumps(themes, ensure_ascii=False), affect, essence, hunch,
-             latency, MODEL_PATH.name, raw[:500]),
+             latency, CLAUDE_MODEL, raw[:500]),
         )
+
+
+def reset_db() -> None:
+    """Usuwa bazę i mirror — czyste slate, wszystkie pliki wracają do kolejki."""
+    if DB_PATH.exists():
+        DB_PATH.unlink()
+    import shutil
+    if MIRROR_DIR.exists():
+        shutil.rmtree(MIRROR_DIR)
+    print("[consolidator] baza wyczyszczona — wszystkie pliki ponownie w kolejce.", file=sys.stderr)
 
 
 def get_queue_summary() -> dict:
@@ -241,60 +246,28 @@ def write_mirror(source_type: str, result: dict) -> None:
         f.write(json.dumps(result, ensure_ascii=False) + "\n")
 
 
-# ── LlamaServer ──────────────────────────────────────────────────────────────
+# ── Claude API ───────────────────────────────────────────────────────────────
 
-_server_proc: subprocess.Popen | None = None
+def _get_client():
+    import anthropic
+    import os
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        key_file = Path.home() / ".config" / "ciel" / "api_key"
+        if key_file.exists():
+            api_key = key_file.read_text().strip()
+    return anthropic.Anthropic(api_key=api_key) if api_key else anthropic.Anthropic()
 
 
-def start_llama_server() -> bool:
-    global _server_proc
-    if not LLAMA_SERVER.exists():
-        print(f"[consolidator] BŁĄD: llama-server nie znaleziony: {LLAMA_SERVER}", file=sys.stderr)
-        return False
-    if not MODEL_PATH.exists():
-        print(f"[consolidator] BŁĄD: model nie znaleziony: {MODEL_PATH}", file=sys.stderr)
-        return False
-    if _is_server_running():
-        return True
-
-    print(f"[consolidator] Uruchamiam llama-server ({MODEL_PATH.name})...", file=sys.stderr)
-    _server_proc = subprocess.Popen(
-        [str(LLAMA_SERVER), "--model", str(MODEL_PATH),
-         "--port", str(LLAMA_PORT), "--ctx-size", str(N_CTX),
-         "--n-gpu-layers", "99", "--threads", "4", "--log-disable"],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+def _query_claude(content: str) -> str:
+    client = _get_client()
+    msg = client.messages.create(
+        model=CLAUDE_MODEL,
+        max_tokens=MAX_TOKENS,
+        system=SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": content}],
     )
-    for _ in range(40):
-        time.sleep(1)
-        if _is_server_running():
-            print(f"[consolidator] llama-server gotowy (pid={_server_proc.pid})", file=sys.stderr)
-            return True
-        if _server_proc.poll() is not None:
-            print("[consolidator] llama-server zakończył się przedwcześnie", file=sys.stderr)
-            return False
-    print("[consolidator] llama-server timeout", file=sys.stderr)
-    return False
-
-
-def stop_llama_server() -> None:
-    global _server_proc
-    if _server_proc and _server_proc.poll() is None:
-        _server_proc.terminate()
-        try:
-            _server_proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            _server_proc.kill()
-    _server_proc = None
-
-
-def _is_server_running() -> bool:
-    try:
-        with urllib.request.urlopen(
-            f"http://localhost:{LLAMA_PORT}/health", timeout=2
-        ) as r:
-            return r.status == 200
-    except Exception:
-        return False
+    return msg.content[0].text.strip()
 
 
 # ── Consolidator ─────────────────────────────────────────────────────────────
@@ -304,32 +277,11 @@ def _read_file_excerpt(path: Path) -> str:
     try:
         text = path.read_text(encoding="utf-8", errors="ignore")
         if path.suffix == ".jsonl":
-            # Czytaj ostatnie 8 linii
             lines = [l for l in text.splitlines() if l.strip()][-8:]
             return "\n".join(lines)[:1200]
         return text[:1200]
     except Exception:
         return ""
-
-
-def _query_llama(content: str) -> str:
-    payload = json.dumps({
-        "model": "local",
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": content},
-        ],
-        "max_tokens": MAX_TOKENS,
-        "temperature": 0.3,
-        "stop": ["\n\n"],
-    }).encode("utf-8")
-    req = urllib.request.Request(
-        LLAMA_URL, data=payload,
-        headers={"Content-Type": "application/json"}, method="POST",
-    )
-    with urllib.request.urlopen(req, timeout=45) as resp:
-        data = json.loads(resp.read())
-        return data["choices"][0]["message"]["content"].strip()
 
 
 def _parse_response(raw: str) -> dict:
@@ -423,9 +375,9 @@ def process_file(file_row: sqlite3.Row, cycle: int) -> bool:
     user_msg = f"File: {path.name}\n\n{content}"
     t0 = time.time()
     try:
-        raw = _query_llama(user_msg)
+        raw = _query_claude(user_msg)
     except Exception as e:
-        print(f"[consolidator] błąd llama dla {path.name}: {e}", file=sys.stderr)
+        print(f"[consolidator] błąd Claude API dla {path.name}: {e}", file=sys.stderr)
         return False
 
     latency = round(time.time() - t0, 2)
@@ -452,7 +404,7 @@ def process_file(file_row: sqlite3.Row, cycle: int) -> bool:
         "source_type": file_row["source_type"],
         "consolidation": parsed,
         "latency_s": latency,
-        "model": MODEL_PATH.name,
+        "model": CLAUDE_MODEL,
     }
     write_mirror(file_row["source_type"], result)
 
@@ -489,7 +441,7 @@ def _write_status(cycle: int, running: bool) -> None:
         "running": running,
         "pid": os.getpid() if running else None,
         "cycle": cycle,
-        "model": MODEL_PATH.name,
+        "model": CLAUDE_MODEL,
         "db": str(DB_PATH),
     }
     STATUS_FILE.write_text(json.dumps(status, ensure_ascii=False, indent=2))
@@ -516,12 +468,8 @@ def run_daemon(interval: int = DEFAULT_INTERVAL) -> None:
     PID_FILE.write_text(str(os.getpid()))
     init_db()
 
-    if not start_llama_server():
-        print("[consolidator] nie udało się uruchomić llama-server. Kończę.", file=sys.stderr)
-        return
-
     _write_status(cycle=0, running=True)
-    print(f"[consolidator] daemon uruchomiony · pid={os.getpid()} · interval={interval}s · model={MODEL_PATH.name}", file=sys.stderr)
+    print(f"[consolidator] daemon uruchomiony · pid={os.getpid()} · interval={interval}s · model={CLAUDE_MODEL}", file=sys.stderr)
 
     cycle = 1
     try:
@@ -538,7 +486,6 @@ def run_daemon(interval: int = DEFAULT_INTERVAL) -> None:
         pass
     finally:
         _write_status(cycle=cycle, running=False)
-        stop_llama_server()
         if PID_FILE.exists():
             PID_FILE.unlink()
         print("[consolidator] daemon zatrzymany.", file=sys.stderr)
@@ -546,14 +493,8 @@ def run_daemon(interval: int = DEFAULT_INTERVAL) -> None:
 
 def run_once(batch: int = 5) -> None:
     init_db()
-    if not start_llama_server():
-        print("[consolidator] nie udało się uruchomić llama-server.", file=sys.stderr)
-        return
-    try:
-        n = run_cycle(cycle=1, batch=batch)
-        print(f"[consolidator] przetworzono {n} plików.", file=sys.stderr)
-    finally:
-        stop_llama_server()
+    n = run_cycle(cycle=1, batch=batch)
+    print(f"[consolidator] przetworzono {n} plików.", file=sys.stderr)
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
@@ -564,11 +505,14 @@ if __name__ == "__main__":
     parser.add_argument("--daemon",   action="store_true", help="tryb ciągły")
     parser.add_argument("--status",   action="store_true", help="status i ostatnie wyniki")
     parser.add_argument("--queue",    action="store_true", help="pokaż kolejkę plików")
+    parser.add_argument("--reset",    action="store_true", help="wyczyść bazę i mirror (fresh start)")
     parser.add_argument("--interval", type=int, default=DEFAULT_INTERVAL)
     parser.add_argument("--batch",    type=int, default=5, help="pliki per cykl")
     args = parser.parse_args()
 
-    if args.status:
+    if args.reset:
+        reset_db()
+    elif args.status:
         init_db()
         summary = get_queue_summary()
         st = json.loads(STATUS_FILE.read_text()) if STATUS_FILE.exists() else {}

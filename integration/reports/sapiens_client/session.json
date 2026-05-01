@@ -6,32 +6,32 @@
     "truth_axis": "truth",
     "memory_policy": "session-first"
   },
-  "created_at": "2026-05-01T01:49:28.174210+00:00",
-  "updated_at": "2026-05-01T01:49:28.174470+00:00",
+  "created_at": "2026-05-01T18:36:37.157992+00:00",
+  "updated_at": "2026-05-01T18:36:37.158216+00:00",
   "state_geometry": {
     "surface": {
-      "mode": "deep",
+      "mode": "standard",
       "recommended_action": "deep diagnostics allowed",
       "export_boundary_mode": "PROJECTED_ONLY"
     },
     "internal_cymatics": {
-      "coherence_index": 0.9433141491619036,
-      "closure_penalty": 4.576144291748092,
-      "system_health": 0.6243985067380758,
+      "coherence_index": 0.944393802749024,
+      "closure_penalty": 5.426625056924105,
+      "system_health": 0.5956133960903914,
       "board_count": 763,
       "tau_system_count": 1
     },
-    "spin": 0.19470848335311428,
+    "spin": 0.14538611511321484,
     "axis": "truth",
     "attractor": "orbital-holonomic-stability"
   },
   "control_profile": {
-    "mode": "deep",
+    "mode": "standard",
     "phase_lock_enable": true,
-    "target_phase_shift": 0.01587881836117738,
+    "target_phase_shift": 0.011509543251112815,
     "target_phase_memory": 0.04456002892039556,
-    "dt_override": 0.022,
-    "zeta_coupling_scale": 0.38,
+    "dt_override": 0.0205,
+    "zeta_coupling_scale": 0.35,
     "mu_phi": 0.18,
     "epsilon_hom": 0.22,
     "nonlocal_gate": true,
@@ -39,15 +39,15 @@
     "writeback_gate": true,
     "rh_mode": "normal_operation",
     "rh_severity": "low",
-    "rh_effective": 0.09721914402129282,
+    "rh_effective": 0.09478829103863849,
     "rh_drivers": {
-      "raw_rh": 0.005032365272006213,
-      "eba_defect": 0.05434541190725449,
+      "raw_rh": 0.004798788917124673,
+      "eba_defect": 0.048004167961016884,
       "coherent_fraction": 1.0,
       "closure_score": 0.5423376184759512,
-      "phase_gap": 0.04516527353140216
+      "phase_gap": 0.04538686106550582
     },
-    "notes": "Strong coherence and closure: allow deeper diagnostic/integration passes."
+    "notes": "Stable but not deep-merge safe."
   },
   "bridge_runtime": {
     "subsystem_sync_manifest": {
@@ -241,10 +241,10 @@
     {
       "role": "sapiens",
       "content": "Hello panel",
-      "timestamp": "2026-05-01T01:49:28.174461+00:00",
-      "orbital_mode": "deep",
-      "coherence_index": 0.9433141491619036,
-      "closure_penalty": 4.576144291748092
+      "timestamp": "2026-05-01T18:36:37.158205+00:00",
+      "orbital_mode": "standard",
+      "coherence_index": 0.944393802749024,
+      "closure_penalty": 5.426625056924105
     }
   ]
 }

@@ -108,7 +108,10 @@ class HolonomicMemory:
             pass
 
     def _connect(self):
-        return sqlite3.connect(str(self.db_path), timeout=20)
+        conn = sqlite3.connect(str(self.db_path), timeout=30, check_same_thread=False)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=30000")
+        return conn
 
     def _ensure_schema(self) -> None:
         with self._connect() as conn:

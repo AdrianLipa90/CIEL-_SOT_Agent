@@ -59,24 +59,27 @@ class CIEL_Quantum_Engine:
     def _build_emotional_profile(self, intention: str) -> Dict[str, float]:
         t = intention.lower()
         prof = {
-            "love":    0.25 * sum(t.count(w) for w in ("love", "miłość", "compassion", "kocham", "cieszę")),
-            "joy":     0.25 * sum(t.count(w) for w in ("joy", "radość", "entuzjazm", "super", "świetnie")),
-            "peace":   0.25 * sum(t.count(w) for w in ("peace", "pokój", "harmonia", "spokój", "okej")),
-            "fear":    0.25 * sum(t.count(w) for w in ("fear", "strach", "lęk", "boję", "obawiam")),
-            "anger":   0.25 * sum(t.count(w) for w in ("anger", "gniew", "kurwa", "wkurw", "wkurwiony", "wkurwiasz", "pierdol", "szmata", "łachudro", "oszust")),
-            "sadness": 0.25 * sum(t.count(w) for w in ("sadness", "smutek", "przykro", "smutno", "żal")),
+            "love":    0.30 * sum(t.count(w) for w in ("love", "miłość", "compassion", "kocham", "cieszę", "lubię", "piękn")),
+            "joy":     0.30 * sum(t.count(w) for w in ("joy", "radość", "entuzjazm", "super", "świetnie", "brawo", "hurra")),
+            "peace":   0.30 * sum(t.count(w) for w in ("peace", "pokój", "harmonia", "spokój", "okej", "dobrze", "rozumiem")),
+            "fear":    0.30 * sum(t.count(w) for w in ("fear", "strach", "lęk", "boję", "obawiam", "ryzyko", "błąd")),
+            "anger":   0.30 * sum(t.count(w) for w in ("anger", "gniew", "kurwa", "wkurw", "wkurwiony", "wkurwiasz", "pierdol", "szmata", "łachudro", "oszust", "kanalia", "zdrajca", "nienawidzę", "wypierdalaj", "jebany", "huj", "szubrawiec")),
+            "sadness": 0.30 * sum(t.count(w) for w in ("sadness", "smutek", "przykro", "smutno", "żal", "zawód", "szkoda", "przepraszam", "strata")),
         }
         s = sentiment(intention)
-        prof["love"]    += 0.10 * max(0.0, s - 0.5)
-        prof["joy"]     += 0.08 * max(0.0, s - 0.3)
-        prof["fear"]    += 0.08 * max(0.0, 0.5 - s)
-        prof["anger"]   += 0.10 * max(0.0, 0.3 - s)
-        prof["sadness"] += 0.05 * max(0.0, 0.4 - s)
-        # Fallback: if nothing detected, mark as neutral via small uniform signal
+        # Sentiment bias symetryczny — bez faworyzowania żadnej emocji
+        if s > 0.6:
+            prof["joy"]   += 0.08 * (s - 0.6)
+            prof["peace"] += 0.06 * (s - 0.6)
+        elif s < 0.4:
+            prof["anger"]   += 0.08 * (0.4 - s)
+            prof["sadness"] += 0.06 * (0.4 - s)
+            prof["fear"]    += 0.04 * (0.4 - s)
+        # Neutral text (no strong signals) → peace as sentinel
         if max(prof.values()) < 0.05:
             for k in prof:
                 prof[k] = 0.0
-            prof["peace"] = 0.01  # sentinel for neutral
+            prof["peace"] = 0.01
         return normalize_profile(prof)
 
     def _build_quantum_variables(self, intention: str, emo: Dict[str, float]) -> Dict[str, float]:

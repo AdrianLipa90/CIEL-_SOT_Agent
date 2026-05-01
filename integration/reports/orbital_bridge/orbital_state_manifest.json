@@ -1,17 +1,17 @@
 {
-  "coherence_index": 0.9444151494339608,
+  "coherence_index": 0.9443751214829261,
   "topological_charge_global": 0.14538611511321484,
   "phase_lock_error": 5.426625056924105,
   "beat_frequency_target_hz": 7.83,
   "spectral_radius_A": 1.7058158434883552,
   "fiedler_L": 0.027920098943528735,
   "zeta_enabled": true,
-  "nonlocal_phi_ab_mean": 0.005994399033428393,
-  "nonlocal_phi_berry_mean": -0.09836923932143869,
-  "nonlocal_eba_defect_mean": 0.04786185672810459,
+  "nonlocal_phi_ab_mean": 0.005694039617000905,
+  "nonlocal_phi_berry_mean": -0.09790876810087257,
+  "nonlocal_eba_defect_mean": 0.04812870973500233,
   "nonlocal_coherent_fraction": 1.0,
   "euler_bridge_closure_score": 0.5423376184759512,
   "euler_bridge_target_phase": 0.04456002892039556,
-  "effective_rh": 0.09474937591120768,
-  "timestamp": "2026-05-01T15:24:12.385724+00:00"
+  "effective_rh": 0.09482811720944095,
+  "timestamp": "2026-05-01T18:37:57.025167+00:00"
 }
